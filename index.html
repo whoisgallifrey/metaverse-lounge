@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyberpunk Vaporwave Metaverse Library</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Pixel art & cozy retro fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- Three.js from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+  <!-- Scanline & CRT Vaporwave overlay -->
+  <div id="crt-overlay" class="crt-overlay"></div>
+  <div id="vignette" class="vignette"></div>
+
+  <!-- ========================================== -->
+  <!-- 1) 2D LANDING PAGE WITH PIXEL DOOR         -->
+  <!-- ========================================== -->
+  <div id="landing-page" class="landing-page">
+    <canvas id="stars-canvas" class="stars-canvas"></canvas>
+
+    <div class="landing-content">
+      <div class="landing-header">
+        <div class="japanese-title glow-teal">電脳電波 秘密の花園</div>
+        <h1 class="main-title glitch-text" data-text="CYBER META LIBRARY">CYBER META LIBRARY</h1>
+        <p class="subtitle glow-pink">🌸 PASTEL VAPORWAVE SECRET GARDEN & POOL ROOM 🌸</p>
+      </div>
+
+      <!-- The 2D Pixel Art Door Container -->
+      <div class="door-scene">
+        <!-- Floating Japanese & Neon Kanji tags -->
+        <div class="door-kanji-tag left-tag">電脳空間</div>
+        <div class="door-kanji-tag right-tag">読書天国</div>
+
+        <!-- Knock Knock Comic Sound Effect Balloon -->
+        <div id="knock-balloon" class="knock-balloon hidden">
+          <span class="knock-jp">トントン！</span>
+          <span class="knock-en">KNOCK, KNOCK!</span>
+          <div class="knock-sub">「扉が開きます…」</div>
+        </div>
+
+        <!-- 2D Pixel Door Frame -->
+        <div id="pixel-door-wrapper" class="pixel-door-wrapper" role="button" tabindex="0" title="Click to knock and enter!">
+          <div class="door-arch">
+            <span class="arch-text">秘密の図書室 • ENTER METAVERSE</span>
+          </div>
+
+          <div class="door-frame">
+            <!-- Left Door Leaf -->
+            <div id="door-left" class="door-leaf door-leaf-left">
+              <div class="door-panel upper-panel">
+                <div class="pixel-star">✦</div>
+              </div>
+              <div class="door-panel lower-panel">
+                <div class="door-crest">🌸</div>
+              </div>
+            </div>
+
+            <!-- Right Door Leaf -->
+            <div id="door-right" class="door-leaf door-leaf-right">
+              <div class="door-panel upper-panel">
+                <div class="pixel-star">✦</div>
+              </div>
+              <div class="door-panel lower-panel">
+                <div class="door-knob"></div>
+              </div>
+            </div>
+
+            <!-- Portal light beam pouring from inside when door opens -->
+            <div id="portal-light" class="portal-light">
+              <div class="portal-core"></div>
+              <div class="portal-text">ようこそ<br>WELCOME</div>
+            </div>
+          </div>
+
+          <div class="door-mat">
+            <span>WELCOME • いらっしゃいませ</span>
+          </div>
+        </div>
+
+        <div class="door-hint">
+          <span class="blink-arrow">▲</span>
+          <span class="hint-text">CLICK THE PIXEL DOOR TO KNOCK & ENTER</span>
+          <span class="blink-arrow">▲</span>
+        </div>
+      </div>
+
+      <div class="landing-footer">
+        <div class="pixel-badge">PUBLIC DOMAIN E-BOOKS</div>
+        <div class="pixel-badge">LO-FI CASSETTE RADIO</div>
+        <div class="pixel-badge">WINGED PURRING CAT</div>
+        <div class="pixel-badge">FLAMINGO POOL</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 2) 3D METAVERSE VOLUMETRIC SPACE           -->
+  <!-- ========================================== -->
+  <div id="metaverse-container" class="metaverse-container hidden">
+    <!-- Three.js Canvas renders here -->
+    <div id="webgl-canvas-container"></div>
+
+    <!-- HUD / Cyberpunk Navigation & Status -->
+    <div class="metaverse-hud">
+      <!-- Top Bar -->
+      <div class="hud-top-bar">
+        <div class="hud-brand">
+          <span class="hud-icon">🌸</span>
+          <div class="hud-title-wrap">
+            <div class="hud-title">METAVERSE SECRET LIBRARY</div>
+            <div class="hud-sub">電脳空間 • 夢の読書庭園 • POOL BACKROOM</div>
+          </div>
+        </div>
+
+        <!-- Center Quick Camera Presets -->
+        <div class="camera-presets">
+          <button id="cam-free" class="preset-btn active" title="Walk & Free Explore">🚶 Walk / Explore</button>
+          <button id="cam-couch" class="preset-btn" title="Sit on Bright Pink Inflatable Couch">🛋️ Sit on Couch</button>
+          <button id="cam-library" class="preset-btn" title="Inspect Central Bookshelf">📚 Central Library</button>
+          <button id="cam-pool" class="preset-btn" title="Pool & Flamingo Floaties">🦩 Flamingo Pool</button>
+          <button id="cam-cat" class="preset-btn" title="Fly to Winged Purring Cat">🐱 Winged Cat</button>
+        </div>
+
+        <!-- Exit Door Button -->
+        <button id="exit-btn" class="exit-portal-btn" title="Exit back to 2D landing page">
+          <span class="exit-icon">🚪</span>
+          <span class="exit-text">EXIT TO 2D / 戻る</span>
+        </button>
+      </div>
+
+      <!-- Left Interaction Prompt Toast -->
+      <div id="interaction-prompt" class="interaction-prompt hidden">
+        <div class="prompt-key">[CLICK / TAP]</div>
+        <div id="prompt-label" class="prompt-label">Interact</div>
+      </div>
+
+      <!-- Right Floating Radio & Lofi Music Player Widget -->
+      <div class="radio-widget">
+        <div class="radio-header">
+          <span class="radio-cassette-icon">📻</span>
+          <span class="radio-title">VAPOR LO-FI RADIO</span>
+          <span id="radio-live-badge" class="radio-status-badge">OFF</span>
+        </div>
+        <div class="radio-body">
+          <div class="track-display">
+            <span class="now-playing-label">TRACK:</span>
+            <div id="track-name" class="track-name marquee">Click Power To Start Lo-Fi</div>
+          </div>
+          <!-- Animated visualizer bars -->
+          <div id="visualizer-bars" class="visualizer-bars">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+          </div>
+          <div class="radio-controls">
+            <button id="radio-power-btn" class="radio-btn power-btn" title="Turn Radio On/Off">⏻ POWER</button>
+            <button id="radio-prev-btn" class="radio-btn" title="Previous Track">⏮</button>
+            <button id="radio-play-btn" class="radio-btn" title="Play/Pause">▶</button>
+            <button id="radio-next-btn" class="radio-btn" title="Next Track">⏭</button>
+            <button id="radio-cat-purr-toggle" class="radio-btn purr-btn active" title="Toggle Cat Purr & Waterfall SFX">🐱 SFX: ON</button>
+          </div>
+          <div class="volume-slider-wrap">
+            <span class="vol-label">VOL</span>
+            <input type="range" id="radio-volume" min="0" max="1" step="0.05" value="0.75" class="volume-slider">
+          </div>
+        </div>
+        <div class="radio-source-tag">Music: open-lofi / CC0 Public Domain</div>
+      </div>
+
+      <!-- Bottom Floating Controls Legend & Cozy Status -->
+      <div class="hud-bottom-bar">
+        <div class="controls-guide">
+          <span class="guide-item"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or <kbd>Arrows</kbd> to Move</span>
+          <span class="guide-item">• Drag Mouse to Look</span>
+          <span class="guide-item">• Click 3D Objects: Books, Couch, Cat, Radio, Door</span>
+        </div>
+        <div id="cat-status-toast" class="cat-status-toast hidden">
+          <span class="toast-heart">♥</span>
+          <span id="cat-toast-text">Winged Cat is purring gently...</span>
+          <span class="toast-heart">♥</span>
+        </div>
+      </div>
+
+      <!-- Mobile On-Screen Joystick / Touch Controls -->
+      <div id="touch-controls" class="touch-controls">
+        <div class="touch-dpad">
+          <button id="btn-up" class="dpad-btn up">▲</button>
+          <div class="dpad-middle">
+            <button id="btn-left" class="dpad-btn left">◀</button>
+            <button id="btn-down" class="dpad-btn down">▼</button>
+            <button id="btn-right" class="dpad-btn right">▶</button>
+          </div>
+        </div>
+        <button id="btn-touch-action" class="touch-action-btn">INTERACT / READ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 3) COZY E-BOOK READER MODAL                -->
+  <!-- ========================================== -->
+  <div id="book-reader-modal" class="book-reader-modal hidden" role="dialog" aria-modal="true">
+    <div class="reader-backdrop" id="reader-backdrop"></div>
+    <div class="reader-device">
+      <!-- Cyberpunk Vaporwave Tablet Frame -->
+      <div class="device-header">
+        <div class="device-lights">
+          <span class="dot dot-pink"></span>
+          <span class="dot dot-teal"></span>
+          <span class="dot dot-yellow"></span>
+        </div>
+        <div class="device-brand">CYBER-READER v2.0 • PUBLIC DOMAIN LIBRARY</div>
+        <button id="close-reader-btn" class="close-device-btn" title="Close Book">✕</button>
+      </div>
+
+      <div class="device-screen">
+        <div class="book-meta-strip">
+          <div class="book-meta-left">
+            <h2 id="book-title" class="book-title">Alice's Adventures in Wonderland</h2>
+            <div id="book-author" class="book-author">Lewis Carroll (1865)</div>
+            <div class="book-source">
+              <span>Source:</span>
+              <a href="https://publicdomainlibrary.org/en/ebooks" target="_blank" rel="noopener" class="pdl-link">
+                publicdomainlibrary.org/en/ebooks ↗
+              </a>
+            </div>
+          </div>
+          <div class="book-cover-badge" id="book-cover-badge">📖 EBOOK</div>
+        </div>
+
+        <!-- Book Reading Page Content -->
+        <div class="book-reading-viewport" id="book-reading-viewport">
+          <div class="reading-controls-bar">
+            <div class="font-size-controls">
+              <span>Size:</span>
+              <button id="font-decrease" class="ctrl-btn">A-</button>
+              <button id="font-increase" class="ctrl-btn">A+</button>
+            </div>
+            <div class="theme-controls">
+              <button id="theme-vapor" class="ctrl-btn active">Vapor</button>
+              <button id="theme-parchment" class="ctrl-btn">Parchment</button>
+              <button id="theme-dark" class="ctrl-btn">Night</button>
+            </div>
+            <div class="chapter-nav">
+              <span id="page-indicator">Chapter 1 / 3</span>
+            </div>
+          </div>
+
+          <div class="book-text-content" id="book-text-content">
+            <!-- Dynamically populated book text -->
+          </div>
+        </div>
+
+        <!-- Reader Footer -->
+        <div class="reader-footer">
+          <button id="prev-page-btn" class="page-nav-btn">◀ Prev Section</button>
+          <button id="sit-and-read-btn" class="couch-read-btn">🛋️ Read on Pink Couch</button>
+          <button id="next-page-btn" class="page-nav-btn">Next Section ▶</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
