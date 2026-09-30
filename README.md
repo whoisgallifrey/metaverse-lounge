@@ -15,7 +15,15 @@ A cozy, relaxing 3D metaverse library and lounge built with HTML, CSS, JavaScrip
 - **📚 Central Library & Cyber-Reader**: Bookshelf with interactive books sourced from [publicdomainlibrary.org/en/ebooks](https://publicdomainlibrary.org/en/ebooks) (*Alice in Wonderland*, *The Metamorphosis*, *The Time Machine*, *Frankenstein*, *The Prophet*, *The Art of War*, *The Picture of Dorian Gray*, *The Yellow Wallpaper*). Includes an in-game cyber-tablet reader with font sizing and color themes (Vapor, Parchment, Night).
 - **🛋️ Bright Pink Inflatable Couch**: Users can relax on a glossy puffy hot-pink vinyl couch with pillows and take in the relaxing lounge view.
 - **🦩 Flamingo Pool & Cascading Waterfall**: Sunken pool with animated water vertex ripples, 3D pink flamingo inflatable floaties bobbing in the water, and a glowing waterfall cascading down the wall with continuous splash particles.
-- **🐱 Winged Kawaii Purring Cat**: Cute floating 3D cat with flapping angel wings that patrols the room. Features synthesized feline purring via the Web Audio API and can be petted to spin and meow.
+- **🐱 Winged Kawaii Purring Cat**: Cute floating 3D cat with flapping wings that patrols the room. Features continuous synthesized feline purring via Web Audio API. When petted, its eyes close into happy anime crescents (`^ . ^`), it nuzzles upward, heart particles burst in 3D, and it shares **Words of Wisdom**!
+- **📜 Words of Wisdom Speech Bubble**: When the cat is petted, a comic speech bubble pops up over the cat offering inspiring literary quotes from Goodreads classics (Oscar Wilde, Lewis Carroll, Marcus Aurelius, Camus, Lao Tzu, etc.).
+- **🐾 Kawaii Neko Salon / Customizer (`🎨 Style Neko`)**: Tamagotchi-style salon interface to customize your cat companion:
+  - Fur coats: Peach, Calico (三毛), Tabby stripes (虎), Tuxedo, Sakura Pink, Snow White, Midnight Void.
+  - Spots and stripes color swatches.
+  - Eye colors (including Heterochromia Blue/Gold).
+  - Wings: Angel, Pixie, Kawaii Bat, Stardust.
+  - Accessories: Glowing Halo, Pink Bow, Sakura Flower Pin, Cyber Witch Hat.
+  - Custom name with 3D floating nametag saved in browser `localStorage`.
 - **📻 Retro Lo-Fi Boombox**: 3D radio on a pedestal with animated equalizer bars playing open-source lo-fi music (`btahir/open-lofi`) with an offline generative lo-fi chillhop synthesizer fallback.
 - **🚪 Exit Portal**: 3D door (`EXIT TO 2D / 戻る`) that transitions back to the 2D landing page.
 

@@ -124,6 +124,7 @@
           <button id="cam-library" class="preset-btn" title="Inspect Central Bookshelf">📚 Central Library</button>
           <button id="cam-pool" class="preset-btn" title="Pool & Flamingo Floaties">🦩 Flamingo Pool</button>
           <button id="cam-cat" class="preset-btn" title="Fly to Winged Purring Cat">🐱 Winged Cat</button>
+          <button id="open-neko-salon-btn" class="preset-btn salon-preset-btn" title="Customize Your Winged Cat">🎨 Style Neko</button>
         </div>
 
         <!-- Exit Door Button -->
@@ -203,6 +204,14 @@
         </div>
         <button id="btn-touch-action" class="touch-action-btn">INTERACT / READ</button>
       </div>
+
+      <!-- Floating Words of Wisdom Comic Speech Bubble for Cat -->
+      <div id="cat-wisdom-bubble" class="cat-wisdom-bubble hidden">
+        <div class="wisdom-tag">🐾 NEKO'S WORDS OF WISDOM 🐾</div>
+        <div id="wisdom-quote-text" class="wisdom-quote-text">"Be yourself; everyone else is already taken."</div>
+        <div id="wisdom-quote-author" class="wisdom-quote-author">— Oscar Wilde</div>
+        <div class="wisdom-bubble-arrow"></div>
+      </div>
     </div>
   </div>
 
@@ -267,6 +276,98 @@
           <button id="sit-and-read-btn" class="couch-read-btn">🛋️ Read on Pink Couch</button>
           <button id="next-page-btn" class="page-nav-btn">Next Section ▶</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4) KAWAII NEKO SALON / CUSTOMIZER MODAL    -->
+  <!-- ========================================== -->
+  <div id="neko-salon-modal" class="neko-salon-modal hidden" role="dialog" aria-modal="true">
+    <div class="salon-backdrop" id="salon-backdrop"></div>
+    <div class="salon-card">
+      <div class="salon-header">
+        <div class="salon-brand">
+          <span class="salon-icon">🐾</span>
+          <span class="salon-title">KAWAII NEKO SALON • 猫のカスタム</span>
+        </div>
+        <button id="close-salon-btn" class="close-device-btn" title="Close Salon">✕</button>
+      </div>
+
+      <div class="salon-body">
+        <!-- Neko Name -->
+        <div class="salon-row">
+          <label class="salon-label">Neko Name (名前):</label>
+          <input type="text" id="neko-name-input" maxlength="15" value="Mochi" class="salon-input" placeholder="Name your cat..." />
+        </div>
+
+        <!-- Coat Style -->
+        <div class="salon-row">
+          <label class="salon-label">Fur Coat & Pattern (毛並み):</label>
+          <div class="salon-btn-group" id="coat-selection">
+            <button class="salon-pill-btn active" data-coat="peach">🍑 Peach</button>
+            <button class="salon-pill-btn" data-coat="calico">🐾 Calico (三毛)</button>
+            <button class="salon-pill-btn" data-coat="tabby">🐯 Tabby (縞)</button>
+            <button class="salon-pill-btn" data-coat="tuxedo">👔 Tuxedo</button>
+            <button class="salon-pill-btn" data-coat="sakura">🌸 Sakura</button>
+            <button class="salon-pill-btn" data-coat="white">❄️ Snow</button>
+            <button class="salon-pill-btn" data-coat="void">✨ Void</button>
+          </div>
+        </div>
+
+        <!-- Spot / Pattern Color -->
+        <div class="salon-row">
+          <label class="salon-label">Spots & Patches Color (斑点の色):</label>
+          <div class="salon-color-swatches" id="spot-swatches">
+            <button class="color-swatch active" data-color="#78350f" style="background:#78350f" title="Caramel Choco"></button>
+            <button class="color-swatch" data-color="#ff71ce" style="background:#ff71ce" title="Strawberry Pink"></button>
+            <button class="color-swatch" data-color="#05ffa1" style="background:#05ffa1" title="Matcha Mint"></button>
+            <button class="color-swatch" data-color="#b757ff" style="background:#b757ff" title="Lavender Ube"></button>
+            <button class="color-swatch" data-color="#1e1b4b" style="background:#1e1b4b" title="Midnight Navy"></button>
+            <button class="color-swatch" data-color="#f59e0b" style="background:#f59e0b" title="Golden Ginger"></button>
+          </div>
+        </div>
+
+        <!-- Eye Color -->
+        <div class="salon-row">
+          <label class="salon-label">Eye Color (瞳の色):</label>
+          <div class="salon-color-swatches" id="eye-swatches">
+            <button class="color-swatch active" data-eye="#1e1b4b" style="background:#1e1b4b" title="Deep Midnight"></button>
+            <button class="color-swatch" data-eye="#05ffa1" style="background:#05ffa1" title="Emerald Mint"></button>
+            <button class="color-swatch" data-eye="#01cdfe" style="background:#01cdfe" title="Sapphire Teal"></button>
+            <button class="color-swatch" data-eye="#fffb96" style="background:#fffb96" title="Golden Amber"></button>
+            <button class="color-swatch" data-eye="#ff71ce" style="background:#ff71ce" title="Ruby Pink"></button>
+            <button class="color-swatch" data-eye="hetero" style="background:linear-gradient(135deg, #01cdfe 50%, #fffb96 50%)" title="Heterochromia (Blue/Gold)"></button>
+          </div>
+        </div>
+
+        <!-- Wings Type -->
+        <div class="salon-row">
+          <label class="salon-label">Wings Style (羽のスタイル):</label>
+          <div class="salon-btn-group" id="wings-selection">
+            <button class="salon-pill-btn active" data-wing="angel">🪽 Angel</button>
+            <button class="salon-pill-btn" data-wing="pixie">🧚 Pixie</button>
+            <button class="salon-pill-btn" data-wing="bat">🦇 Kawaii Bat</button>
+            <button class="salon-pill-btn" data-wing="star">⭐ Stardust</button>
+          </div>
+        </div>
+
+        <!-- Headgear / Accessories -->
+        <div class="salon-row">
+          <label class="salon-label">Accessories (アクセサリー):</label>
+          <div class="salon-btn-group" id="acc-selection">
+            <button class="salon-pill-btn active" data-acc="halo">✦ Halo</button>
+            <button class="salon-pill-btn" data-acc="bow">🎀 Pink Bow</button>
+            <button class="salon-pill-btn" data-acc="sakura">🌸 Sakura</button>
+            <button class="salon-pill-btn" data-acc="wizard">🧙 Witch Hat</button>
+            <button class="salon-pill-btn" data-acc="none">None</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="salon-footer">
+        <button id="reset-neko-btn" class="page-nav-btn">Reset Defaults</button>
+        <button id="save-neko-btn" class="couch-read-btn">💾 Save & Adopt (決定)</button>
       </div>
     </div>
   </div>

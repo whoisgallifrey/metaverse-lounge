@@ -1222,3 +1222,241 @@ body, html {
     display: flex;
   }
 }
+
+/* ==========================================================================
+   NEKO'S WORDS OF WISDOM SPEECH BUBBLE
+   ========================================================================== */
+.cat-wisdom-bubble {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.96);
+  color: #1a082b;
+  border: 3px solid var(--vapor-pink);
+  box-shadow: 
+    0 0 20px rgba(255, 113, 206, 0.7),
+    4px 4px 0 #3b1464;
+  border-radius: 10px;
+  padding: 12px 16px;
+  max-width: 320px;
+  min-width: 200px;
+  z-index: 100;
+  transform: translate(-50%, -100%);
+  animation: balloon-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.wisdom-tag {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: #ff007f;
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.wisdom-quote-text {
+  font-family: var(--font-cozy);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #1e1133;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.wisdom-quote-author {
+  font-family: var(--font-retro);
+  font-size: 14px;
+  color: #7c3aed;
+  text-align: right;
+  font-weight: bold;
+}
+
+.wisdom-bubble-arrow {
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 12px 9px 0;
+  border-style: solid;
+  border-color: var(--vapor-pink) transparent;
+  display: block;
+  width: 0;
+}
+
+/* ==========================================================================
+   KAWAII NEKO SALON MODAL
+   ========================================================================== */
+.neko-salon-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.salon-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 6, 26, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.salon-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  background: #240c42;
+  border: 4px solid var(--vapor-teal);
+  border-radius: 12px;
+  box-shadow: 
+    0 0 35px rgba(1, 205, 254, 0.5),
+    0 0 80px rgba(255, 113, 206, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: device-appear 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.salon-header {
+  background: #17072d;
+  border-bottom: 2px solid var(--vapor-teal);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.salon-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.salon-icon {
+  font-size: 18px;
+}
+
+.salon-title {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: var(--vapor-teal);
+  letter-spacing: 1px;
+}
+
+.salon-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.salon-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.salon-label {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  color: var(--vapor-pink);
+  letter-spacing: 1px;
+}
+
+.salon-input {
+  background: #140728;
+  border: 2px solid var(--vapor-teal);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  color: var(--vapor-yellow);
+  outline: none;
+}
+
+.salon-input:focus {
+  box-shadow: 0 0 10px var(--vapor-teal);
+}
+
+.salon-btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.salon-pill-btn {
+  background: #34125a;
+  border: 1px solid var(--vapor-teal);
+  color: #fff;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  padding: 7px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.salon-pill-btn:hover {
+  background: var(--vapor-teal);
+  color: #12091f;
+}
+
+.salon-pill-btn.active {
+  background: var(--vapor-pink);
+  border-color: #ffffff;
+  color: #12091f;
+  box-shadow: 0 0 10px var(--vapor-pink);
+}
+
+.salon-color-swatches {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.color-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid #3b1464;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.color-swatch:hover {
+  transform: scale(1.15);
+}
+
+.color-swatch.active {
+  border-color: #ffffff;
+  box-shadow: 0 0 12px #ffffff;
+  transform: scale(1.18);
+}
+
+.salon-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  background: #1a0833;
+  border-top: 1px solid rgba(1, 205, 254, 0.3);
+}
+
+.salon-preset-btn {
+  background: #4c1d95;
+  border-color: var(--vapor-pink);
+  color: var(--vapor-pink-light);
+}
+
+.salon-preset-btn:hover {
+  background: var(--vapor-pink);
+  color: #12091f;
+}
+

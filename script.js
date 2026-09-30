@@ -1127,76 +1127,254 @@ function createInflatablePinkCouch() {
   scene.add(couchGroup);
 }
 
-// 6. Winged Kawaii Purring Cat
+// ============================================================================
+// 6. WINGED KAWAII PURRING CAT & NEKO CUSTOMIZATION SYSTEM
+// ============================================================================
+const NEKO_WISDOM_QUOTES = [
+  { text: "Be yourself; everyone else is already taken.", author: "Oscar Wilde" },
+  { text: "It is no use going back to yesterday, because I was a different person then.", author: "Lewis Carroll" },
+  { text: "We are all in the gutter, but some of us are looking at the stars.", author: "Oscar Wilde" },
+  { text: "The soul becomes dyed with the color of its thoughts.", author: "Marcus Aurelius" },
+  { text: "Not all those who wander are lost.", author: "J.R.R. Tolkien" },
+  { text: "In the depth of winter, I finally learned that within me there lay an invincible summer.", author: "Albert Camus" },
+  { text: "To live is the rarest thing in the world. Most people exist, that is all.", author: "Oscar Wilde" },
+  { text: "What you seek is seeking you.", author: "Rumi" },
+  { text: "There is nothing either good or bad, but thinking makes it so.", author: "William Shakespeare" },
+  { text: "Silence is a source of great strength.", author: "Lao Tzu" },
+  { text: "The only journey is the one within.", author: "Rainer Maria Rilke" },
+  { text: "Do not go where the path may lead, go instead where there is no path and leave a trail.", author: "Ralph Waldo Emerson" },
+  { text: "Wherever you go, go with all your heart.", author: "Confucius" },
+  { text: "Everything has beauty, but not everyone sees it.", author: "Confucius" },
+  { text: "Until you make peace with who you are, you will never be content with what you have.", author: "Doris Mortman" },
+  { text: "Life is what happens to us while we are making other plans.", author: "Allen Saunders" },
+  { text: "To see a World in a Grain of Sand and a Heaven in a Wild Flower.", author: "William Blake" }
+];
+
+let nekoConfig = {
+  name: "Mochi",
+  coat: "peach",        // peach, calico, tabby, tuxedo, sakura, white, void
+  spotColor: "#78350f",
+  eyeColor: "#1e1b4b",  // hex or "hetero"
+  wingType: "angel",    // angel, pixie, bat, star
+  accessory: "halo"     // halo, bow, sakura, wizard, none
+};
+
+function loadNekoConfig() {
+  try {
+    const saved = localStorage.getItem("neko_metaverse_config");
+    if (saved) {
+      nekoConfig = { ...nekoConfig, ...JSON.parse(saved) };
+    }
+  } catch (e) {
+    console.warn("Could not load neko config:", e);
+  }
+}
+
+function saveNekoConfig() {
+  try {
+    localStorage.setItem("neko_metaverse_config", JSON.stringify(nekoConfig));
+  } catch (e) {
+    console.warn("Could not save neko config:", e);
+  }
+}
+
 let catWings = [];
+let catParts = {};
+let isPettedHappy = false;
+let happyEyeTimer = null;
+let wisdomBubbleTimeout = null;
+let activeHeartParticles = [];
+
+function createHeartTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#ff2a85";
+  ctx.beginPath();
+  ctx.moveTo(32, 20);
+  ctx.bezierCurveTo(32, 10, 16, 10, 16, 26);
+  ctx.bezierCurveTo(16, 42, 32, 52, 32, 58);
+  ctx.bezierCurveTo(32, 52, 48, 42, 48, 26);
+  ctx.bezierCurveTo(48, 10, 32, 10, 32, 20);
+  ctx.fill();
+  return new THREE.CanvasTexture(canvas);
+}
+
+function createNameTagTexture(name) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 64;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "rgba(36, 12, 60, 0.85)";
+  ctx.roundRect ? ctx.roundRect(8, 8, 240, 48, 10) : ctx.fillRect(8, 8, 240, 48);
+  ctx.fill();
+  ctx.strokeStyle = "#ff71ce";
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  ctx.font = "bold 26px 'Comfortaa', sans-serif";
+  ctx.fillStyle = "#fffb96";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(`🐾 ${name} 🐾`, 128, 32);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  return texture;
+}
 
 function createWingedKawaiiCat() {
+  loadNekoConfig();
   const cat = new THREE.Group();
+  catParts = {
+    openEyes: [],
+    closedEyes: [],
+    spots: [],
+    stripes: [],
+    accessories: {},
+    wingGroups: {}
+  };
 
+  // Base Fur Material
   const furMat = new THREE.MeshStandardMaterial({
-    color: "#fed7aa", // pastel peach/cream
-    roughness: 0.6
+    color: "#fed7aa",
+    roughness: 0.55
   });
-  const pinkMat = new THREE.MeshStandardMaterial({
+  catParts.furMat = furMat;
+
+  const innerPinkMat = new THREE.MeshStandardMaterial({
     color: "#ff71ce",
     roughness: 0.4
   });
-  const eyeMat = new THREE.MeshBasicMaterial({ color: "#1e1b4b" });
+  catParts.innerPinkMat = innerPinkMat;
+
+  // Spot Material
+  const spotMat = new THREE.MeshStandardMaterial({
+    color: nekoConfig.spotColor,
+    roughness: 0.55
+  });
+  catParts.spotMat = spotMat;
+
+  // Eye Material
+  const eyeLeftMat = new THREE.MeshBasicMaterial({ color: "#1e1b4b" });
+  const eyeRightMat = new THREE.MeshBasicMaterial({ color: "#1e1b4b" });
+  catParts.eyeLeftMat = eyeLeftMat;
+  catParts.eyeRightMat = eyeRightMat;
 
   // Chubby Cat Body
   const body = new THREE.Mesh(new THREE.SphereGeometry(0.65, 20, 20), furMat);
   body.scale.set(1, 0.9, 1.25);
   body.castShadow = true;
   cat.add(body);
+  catParts.body = body;
 
-  // Head
+  // Spots and Patches Group on Body
+  const spotsGroup = new THREE.Group();
+  cat.add(spotsGroup);
+  catParts.spotsGroup = spotsGroup;
+
+  // Calico Patches on back & side
+  const patch1 = new THREE.Mesh(new THREE.SphereGeometry(0.28, 12, 12), spotMat);
+  patch1.position.set(-0.35, 0.25, 0.1);
+  patch1.scale.set(1, 0.6, 1.2);
+  spotsGroup.add(patch1);
+  catParts.spots.push(patch1);
+
+  const patch2 = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), spotMat);
+  patch2.position.set(0.28, 0.35, -0.3);
+  patch2.scale.set(1.1, 0.5, 1);
+  spotsGroup.add(patch2);
+  catParts.spots.push(patch2);
+
+  // Tabby Stripes on Back
+  for (let s = -2; s <= 2; s++) {
+    const stripe = new THREE.Mesh(new THREE.TorusGeometry(0.66, 0.04, 6, 16, Math.PI), spotMat);
+    stripe.rotation.x = Math.PI / 2;
+    stripe.position.set(0, 0.05, s * 0.22);
+    stripe.scale.set(0.9, 1.2, 0.8);
+    spotsGroup.add(stripe);
+    catParts.stripes.push(stripe);
+  }
+
+  // Tuxedo White Chest & Belly Patch
+  const tuxedoMat = new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.6 });
+  const tuxedoChest = new THREE.Mesh(new THREE.SphereGeometry(0.42, 16, 16), tuxedoMat);
+  tuxedoChest.position.set(0, -0.05, 0.35);
+  tuxedoChest.scale.set(0.9, 1.1, 0.8);
+  spotsGroup.add(tuxedoChest);
+  catParts.tuxedoChest = tuxedoChest;
+
+  // Head Group (for nuzzling & tilting)
+  const headGroup = new THREE.Group();
+  headGroup.position.set(0, 0.45, 0.7);
+
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.52, 20, 20), furMat);
-  head.position.set(0, 0.45, 0.7);
   head.castShadow = true;
-  cat.add(head);
+  headGroup.add(head);
+  catParts.head = head;
+  catParts.headGroup = headGroup;
 
   // Ears
   [-0.32, 0.32].forEach(x => {
     const ear = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.35, 8), furMat);
-    ear.position.set(x, 0.95, 0.65);
+    ear.position.set(x, 0.5, -0.05);
     ear.rotation.z = x > 0 ? -0.2 : 0.2;
-    cat.add(ear);
+    headGroup.add(ear);
 
-    // Inner pink ear
-    const innerEar = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.22, 8), pinkMat);
-    innerEar.position.set(x, 0.94, 0.71);
+    const innerEar = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.22, 8), innerPinkMat);
+    innerEar.position.set(x, 0.49, 0.01);
     innerEar.rotation.z = x > 0 ? -0.2 : 0.2;
-    cat.add(innerEar);
+    headGroup.add(innerEar);
   });
 
-  // Eyes (Big kawaii anime eyes)
-  [-0.18, 0.18].forEach(x => {
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), eyeMat);
-    eye.position.set(x, 0.48, 1.15);
-    cat.add(eye);
+  // Eyes System: Open Eyes vs Cute Happy Closed Eyes (^ . ^)
+  const eyeOffsets = [-0.18, 0.18];
+  eyeOffsets.forEach((x, idx) => {
+    const eyeMat = idx === 0 ? eyeLeftMat : eyeRightMat;
 
-    // Eye highlight
+    // 1) Open Anime Eye (Sphere + Glint)
+    const openEyeGroup = new THREE.Group();
+    const eyeBall = new THREE.Mesh(new THREE.SphereGeometry(0.08, 14, 14), eyeMat);
+    openEyeGroup.add(eyeBall);
+
     const glint = new THREE.Mesh(
-      new THREE.SphereGeometry(0.03, 8, 8),
+      new THREE.SphereGeometry(0.028, 8, 8),
       new THREE.MeshBasicMaterial({ color: "#ffffff" })
     );
-    glint.position.set(x + 0.02, 0.51, 1.21);
-    cat.add(glint);
+    glint.position.set(0.02, 0.03, 0.06);
+    openEyeGroup.add(glint);
+
+    openEyeGroup.position.set(x, 0.03, 0.45);
+    headGroup.add(openEyeGroup);
+    catParts.openEyes.push(openEyeGroup);
+
+    // 2) Closed Happy Eye (^ . ^) Crescent Curve
+    const closedEye = new THREE.Mesh(
+      new THREE.TorusGeometry(0.065, 0.02, 8, 16, Math.PI),
+      new THREE.MeshBasicMaterial({ color: "#1e1b4b" })
+    );
+    closedEye.position.set(x, 0.03, 0.48);
+    closedEye.rotation.z = Math.PI; // Inverted arc = happy closed eye ^
+    closedEye.visible = false;
+    headGroup.add(closedEye);
+    catParts.closedEyes.push(closedEye);
   });
 
   // Blushing Cheeks
   [-0.28, 0.28].forEach(x => {
-    const cheek = new THREE.Mesh(new THREE.CircleGeometry(0.08, 12), pinkMat);
-    cheek.position.set(x, 0.38, 1.14);
+    const cheek = new THREE.Mesh(new THREE.CircleGeometry(0.08, 12), innerPinkMat);
+    cheek.position.set(x, -0.07, 0.44);
     cheek.rotation.y = x > 0 ? 0.3 : -0.3;
-    cat.add(cheek);
+    headGroup.add(cheek);
   });
 
-  // Tiny Nose & Mouth
-  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.06, 6), pinkMat);
-  nose.position.set(0, 0.4, 1.2);
+  // Tiny Cute Nose & Mouth
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.06, 6), innerPinkMat);
+  nose.position.set(0, -0.05, 0.5);
   nose.rotation.x = Math.PI / 2;
-  cat.add(nose);
+  headGroup.add(nose);
+
+  cat.add(headGroup);
 
   // Swaying Tail
   const tailGeo = new THREE.CylinderGeometry(0.08, 0.12, 0.9, 12);
@@ -1206,8 +1384,18 @@ function createWingedKawaiiCat() {
   cat.add(tail);
   cat.userData.tail = tail;
 
-  // Angel / Fairy Wings (Gentle flapping animation!)
-  const wingMat = new THREE.MeshStandardMaterial({
+  // ==========================================
+  // WINGS VARIANTS (Angel, Pixie, Bat, Star)
+  // ==========================================
+  const wingsMasterGroup = new THREE.Group();
+  wingsMasterGroup.position.set(0, 0.45, -0.1);
+  cat.add(wingsMasterGroup);
+  catParts.wingsMasterGroup = wingsMasterGroup;
+
+  catWings = [];
+
+  // 1) Angel Feather Wings (Default)
+  const angelWingMat = new THREE.MeshStandardMaterial({
     color: "#ffffff",
     emissive: "#01cdfe",
     emissiveIntensity: 0.4,
@@ -1215,26 +1403,166 @@ function createWingedKawaiiCat() {
     opacity: 0.85,
     roughness: 0.1
   });
-
+  const angelGroup = new THREE.Group();
   [-1, 1].forEach(side => {
-    const wingGroup = new THREE.Group();
-    const wing = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.35, 0.05), wingMat);
+    const wingG = new THREE.Group();
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.35, 0.05), angelWingMat);
     wing.position.set(side * 0.4, 0, 0);
-    wingGroup.add(wing);
-
-    wingGroup.position.set(side * 0.3, 0.45, -0.1);
-    cat.add(wingGroup);
-    catWings.push({ group: wingGroup, side: side });
+    wingG.add(wing);
+    wingG.position.set(side * 0.3, 0, 0);
+    angelGroup.add(wingG);
+    catWings.push({ group: wingG, side: side, type: "angel" });
   });
+  wingsMasterGroup.add(angelGroup);
+  catParts.wingGroups.angel = angelGroup;
 
-  // Floating Halo above Cat
+  // 2) Pixie Translucent Wings
+  const pixieWingMat = new THREE.MeshStandardMaterial({
+    color: "#ff71ce",
+    emissive: "#ff71ce",
+    emissiveIntensity: 0.5,
+    transparent: true,
+    opacity: 0.7,
+    roughness: 0.1
+  });
+  const pixieGroup = new THREE.Group();
+  [-1, 1].forEach(side => {
+    const wingG = new THREE.Group();
+    const wing = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.85, 12), pixieWingMat);
+    wing.position.set(side * 0.45, 0.2, 0);
+    wing.rotation.z = side * -Math.PI / 3;
+    wingG.add(wing);
+    wingG.position.set(side * 0.3, 0, 0);
+    pixieGroup.add(wingG);
+    catWings.push({ group: wingG, side: side, type: "pixie" });
+  });
+  wingsMasterGroup.add(pixieGroup);
+  catParts.wingGroups.pixie = pixieGroup;
+
+  // 3) Kawaii Bat Wings
+  const batWingMat = new THREE.MeshStandardMaterial({
+    color: "#381254",
+    emissive: "#9333ea",
+    emissiveIntensity: 0.35,
+    roughness: 0.3
+  });
+  const batGroup = new THREE.Group();
+  [-1, 1].forEach(side => {
+    const wingG = new THREE.Group();
+    const batW = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.28, 0.04), batWingMat);
+    batW.position.set(side * 0.38, 0, 0);
+    batW.rotation.z = side * -0.2;
+    wingG.add(batW);
+    wingG.position.set(side * 0.3, 0, 0);
+    batGroup.add(wingG);
+    catWings.push({ group: wingG, side: side, type: "bat" });
+  });
+  wingsMasterGroup.add(batGroup);
+  catParts.wingGroups.bat = batGroup;
+
+  // 4) Stardust Crystal Wings
+  const starWingMat = new THREE.MeshStandardMaterial({
+    color: "#fffb96",
+    emissive: "#fffb96",
+    emissiveIntensity: 0.7,
+    roughness: 0.1
+  });
+  const starGroup = new THREE.Group();
+  [-1, 1].forEach(side => {
+    const wingG = new THREE.Group();
+    const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.35), starWingMat);
+    crystal.position.set(side * 0.45, 0.15, 0);
+    crystal.scale.set(0.6, 1.4, 0.4);
+    wingG.add(crystal);
+    wingG.position.set(side * 0.3, 0, 0);
+    starGroup.add(wingG);
+    catWings.push({ group: wingG, side: side, type: "star" });
+  });
+  wingsMasterGroup.add(starGroup);
+  catParts.wingGroups.star = starGroup;
+
+  // ==========================================
+  // ACCESSORIES (Halo, Bow, Sakura Pin, Wizard Hat)
+  // ==========================================
+  const accessoriesGroup = new THREE.Group();
+  headGroup.add(accessoriesGroup);
+  catParts.accessoriesGroup = accessoriesGroup;
+
+  // 1) Glowing Halo
   const halo = new THREE.Mesh(
     new THREE.TorusGeometry(0.35, 0.04, 8, 24),
     new THREE.MeshBasicMaterial({ color: "#fffb96" })
   );
-  halo.position.set(0, 1.25, 0.7);
+  halo.position.set(0, 0.8, 0);
   halo.rotation.x = Math.PI / 2;
-  cat.add(halo);
+  accessoriesGroup.add(halo);
+  catParts.accessories.halo = halo;
+
+  // 2) Pink Collar Bow
+  const bowMat = new THREE.MeshStandardMaterial({ color: "#ff2a85", roughness: 0.3 });
+  const bowGroup = new THREE.Group();
+  const bowCenter = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), bowMat);
+  bowGroup.add(bowCenter);
+  [-0.1, 0.1].forEach(x => {
+    const loop = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.16, 8), bowMat);
+    loop.rotation.z = x > 0 ? -Math.PI / 2 : Math.PI / 2;
+    loop.position.set(x, 0, 0);
+    bowGroup.add(loop);
+  });
+  bowGroup.position.set(0, -0.4, 0.42);
+  accessoriesGroup.add(bowGroup);
+  catParts.accessories.bow = bowGroup;
+
+  // 3) Sakura Flower Pin on Ear
+  const flowerGroup = new THREE.Group();
+  for (let i = 0; i < 5; i++) {
+    const petal = new THREE.Mesh(
+      new THREE.SphereGeometry(0.05, 8, 8),
+      new THREE.MeshStandardMaterial({ color: "#ff71ce" })
+    );
+    petal.scale.set(0.6, 1.2, 0.4);
+    petal.position.set(Math.cos(i * 1.25) * 0.08, Math.sin(i * 1.25) * 0.08, 0);
+    flowerGroup.add(petal);
+  }
+  const centerPollen = new THREE.Mesh(
+    new THREE.SphereGeometry(0.04, 8, 8),
+    new THREE.MeshBasicMaterial({ color: "#fffb96" })
+  );
+  flowerGroup.add(centerPollen);
+  flowerGroup.position.set(0.32, 0.45, 0.12);
+  accessoriesGroup.add(flowerGroup);
+  catParts.accessories.sakura = flowerGroup;
+
+  // 4) Wizard / Cyber Witch Hat
+  const hatMat = new THREE.MeshStandardMaterial({ color: "#381254", roughness: 0.4 });
+  const hatGroup = new THREE.Group();
+  const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.48, 0.04, 16), hatMat);
+  hatGroup.add(brim);
+  const cone = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.7, 16), hatMat);
+  cone.position.set(0, 0.35, 0);
+  hatGroup.add(cone);
+  const band = new THREE.Mesh(
+    new THREE.TorusGeometry(0.33, 0.03, 8, 20),
+    new THREE.MeshBasicMaterial({ color: "#fffb96" })
+  );
+  band.rotation.x = Math.PI / 2;
+  band.position.set(0, 0.06, 0);
+  hatGroup.add(band);
+  hatGroup.position.set(0, 0.55, -0.05);
+  hatGroup.rotation.x = -0.15;
+  accessoriesGroup.add(hatGroup);
+  catParts.accessories.wizard = hatGroup;
+
+  // 3D Floating Name Tag Billboard
+  const nameSpriteMat = new THREE.SpriteMaterial({
+    map: createNameTagTexture(nekoConfig.name),
+    transparent: true
+  });
+  const nameSprite = new THREE.Sprite(nameSpriteMat);
+  nameSprite.scale.set(1.4, 0.35, 1);
+  nameSprite.position.set(0, 1.55, 0.7);
+  headGroup.add(nameSprite);
+  catParts.nameSprite = nameSprite;
 
   // Interactive Hitbox
   const catHitbox = new THREE.Mesh(
@@ -1243,14 +1571,127 @@ function createWingedKawaiiCat() {
   );
   catHitbox.userData = {
     type: "cat",
-    label: "Pet Winged Purring Cat (🐾 nyaa~)"
+    label: `Pet ${nekoConfig.name} (🐾 nyaa~)`
   };
   cat.add(catHitbox);
   interactiveObjects.push(catHitbox);
+  catParts.hitbox = catHitbox;
 
   cat.position.set(-2, 3.2, 0);
   scene.add(cat);
   wingedCatMesh = cat;
+
+  // Apply loaded configuration immediately
+  applyNekoCustomization();
+}
+
+// Update 3D Cat Model based on nekoConfig
+function applyNekoCustomization() {
+  if (!catParts || !catParts.furMat) return;
+
+  // 1. Fur Coat Patterns & Colors
+  const coatColors = {
+    peach: "#fed7aa",
+    calico: "#fff7ed",
+    tabby: "#e2e8f0",
+    tuxedo: "#1e142e",
+    sakura: "#fbcfe8",
+    white: "#ffffff",
+    void: "#110720"
+  };
+
+  const furColor = coatColors[nekoConfig.coat] || "#fed7aa";
+  catParts.furMat.color.set(furColor);
+
+  // Spot / Patch color
+  catParts.spotMat.color.set(nekoConfig.spotColor);
+
+  // Show/Hide Spots & Stripes depending on Coat
+  const isCalico = nekoConfig.coat === "calico";
+  const isTabby = nekoConfig.coat === "tabby";
+  const isTuxedo = nekoConfig.coat === "tuxedo";
+
+  catParts.spots.forEach(p => p.visible = isCalico);
+  catParts.stripes.forEach(s => s.visible = isTabby);
+  if (catParts.tuxedoChest) {
+    catParts.tuxedoChest.visible = isTuxedo;
+  }
+
+  // 2. Eye Colors
+  if (nekoConfig.eyeColor === "hetero") {
+    catParts.eyeLeftMat.color.set("#01cdfe");  // Sapphire
+    catParts.eyeRightMat.color.set("#fffb96"); // Golden
+  } else {
+    catParts.eyeLeftMat.color.set(nekoConfig.eyeColor);
+    catParts.eyeRightMat.color.set(nekoConfig.eyeColor);
+  }
+
+  // 3. Wings Variant
+  Object.keys(catParts.wingGroups).forEach(wingKey => {
+    catParts.wingGroups[wingKey].visible = (wingKey === nekoConfig.wingType);
+  });
+
+  // 4. Accessories
+  Object.keys(catParts.accessories).forEach(accKey => {
+    catParts.accessories[accKey].visible = (accKey === nekoConfig.accessory);
+  });
+
+  // 5. Update Nametag Billboard & Hitbox Label
+  if (catParts.nameSprite) {
+    catParts.nameSprite.material.map = createNameTagTexture(nekoConfig.name);
+    catParts.nameSprite.material.needsUpdate = true;
+  }
+  if (catParts.hitbox) {
+    catParts.hitbox.userData.label = `Pet ${nekoConfig.name} (🐾 nyaa~)`;
+  }
+}
+
+// Toggle Cat Eyes: Open vs Happy Closed (^ . ^)
+function setCatEyesClosed(isClosed) {
+  if (!catParts.openEyes || !catParts.closedEyes) return;
+  catParts.openEyes.forEach(eye => eye.visible = !isClosed);
+  catParts.closedEyes.forEach(eye => eye.visible = isClosed);
+}
+
+// Show Words of Wisdom Speech Bubble
+function showNekoWisdomQuote() {
+  const bubble = document.getElementById("cat-wisdom-bubble");
+  const quoteText = document.getElementById("wisdom-quote-text");
+  const quoteAuthor = document.getElementById("wisdom-quote-author");
+
+  const randomQuote = NEKO_WISDOM_QUOTES[Math.floor(Math.random() * NEKO_WISDOM_QUOTES.length)];
+  quoteText.innerText = `"${randomQuote.text}"`;
+  quoteAuthor.innerText = `— ${randomQuote.author}`;
+
+  bubble.classList.remove("hidden");
+  updateNekoWisdomBubblePosition();
+
+  if (wisdomBubbleTimeout) clearTimeout(wisdomBubbleTimeout);
+  wisdomBubbleTimeout = setTimeout(() => {
+    bubble.classList.add("hidden");
+  }, 6500);
+}
+
+// Project Cat's 3D Coordinates to 2D Screen for Wisdom Bubble
+function updateNekoWisdomBubblePosition() {
+  const bubble = document.getElementById("cat-wisdom-bubble");
+  if (!bubble || bubble.classList.contains("hidden") || !wingedCatMesh || !camera) return;
+
+  const worldPos = wingedCatMesh.position.clone().add(new THREE.Vector3(0, 1.45, 0));
+  worldPos.project(camera);
+
+  // If object is behind camera, hide bubble
+  if (worldPos.z > 1) {
+    bubble.style.display = "none";
+    return;
+  }
+  bubble.style.display = "block";
+
+  const x = (worldPos.x * 0.5 + 0.5) * window.innerWidth;
+  const y = (-(worldPos.y * 0.5) + 0.5) * window.innerHeight;
+
+  bubble.style.left = `${Math.round(x)}px`;
+  bubble.style.top = `${Math.round(y)}px`;
 }
 
 // 7. Retro Boombox / Radio Playing Open Lo-Fi
@@ -1611,12 +2052,51 @@ function standUpFromCouch() {
   setActivePreset("cam-free");
 }
 
+function burstHeartParticles(originPos) {
+  const heartTex = createHeartTexture();
+  for (let i = 0; i < 8; i++) {
+    const mat = new THREE.SpriteMaterial({
+      map: heartTex,
+      transparent: true,
+      opacity: 0.95
+    });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(0.35, 0.35, 1);
+    sprite.position.copy(originPos).add(new THREE.Vector3(
+      (Math.random() - 0.5) * 0.6,
+      0.3 + Math.random() * 0.4,
+      (Math.random() - 0.5) * 0.6
+    ));
+    scene.add(sprite);
+    activeHeartParticles.push({
+      sprite: sprite,
+      velocity: new THREE.Vector3(
+        (Math.random() - 0.5) * 0.02,
+        0.025 + Math.random() * 0.03,
+        (Math.random() - 0.5) * 0.02
+      ),
+      life: 1.0
+    });
+  }
+}
+
 // Pet the Winged Kawaii Cat
 function petTheWingedCat() {
   audioMgr.playCatMeow();
+  isPettedHappy = true;
 
+  // 1. Kawaii Closed Eyes (^ . ^) for 4 seconds
+  setCatEyesClosed(true);
+
+  // 2. Head nuzzle upward tilt
+  if (catParts.headGroup) {
+    catParts.headGroup.rotation.x = -0.28;
+  }
+
+  // 3. Heart particle explosion & Happy spin
   if (wingedCatMesh) {
-    // 360 degree spin
+    burstHeartParticles(wingedCatMesh.position);
+
     const startY = wingedCatMesh.rotation.y;
     let progress = 0;
     const spinInterval = setInterval(() => {
@@ -1629,7 +2109,20 @@ function petTheWingedCat() {
     }, 16);
   }
 
-  showCatStatusToast("Winged Cat is purring happily! (ฅ^•ﻌ•^ฅ nyaa~ ♥)");
+  // 4. Words of Wisdom Speech Bubble
+  showNekoWisdomQuote();
+
+  // Reset happy eye state after 4.5 seconds
+  if (happyEyeTimer) clearTimeout(happyEyeTimer);
+  happyEyeTimer = setTimeout(() => {
+    isPettedHappy = false;
+    setCatEyesClosed(false);
+    if (catParts.headGroup) {
+      catParts.headGroup.rotation.x = 0;
+    }
+  }, 4500);
+
+  showCatStatusToast(`${nekoConfig.name} is purring with joy! (ฅ^•ﻌ•^ฅ nyaa~ ♥)`);
 }
 
 function showCatStatusToast(text) {
@@ -1735,6 +2228,31 @@ function animate() {
     // Tail sway
     if (wingedCatMesh.userData.tail) {
       wingedCatMesh.userData.tail.rotation.z = Math.sin(time * 4.0) * 0.35;
+    }
+
+    // Natural idle blinking & subtle head tilt (when not petted)
+    if (!isPettedHappy) {
+      const blinkCycle = time % 3.6;
+      const isBlinking = blinkCycle < 0.15;
+      setCatEyesClosed(isBlinking);
+      if (catParts.headGroup) {
+        catParts.headGroup.rotation.x = Math.sin(time * 1.6) * 0.05;
+      }
+    }
+
+    // Update floating Words of Wisdom bubble position
+    updateNekoWisdomBubblePosition();
+
+    // Floating heart particles update
+    for (let i = activeHeartParticles.length - 1; i >= 0; i--) {
+      const hp = activeHeartParticles[i];
+      hp.sprite.position.add(hp.velocity);
+      hp.life -= delta * 0.9;
+      hp.sprite.material.opacity = Math.max(0, hp.life);
+      if (hp.life <= 0) {
+        scene.remove(hp.sprite);
+        activeHeartParticles.splice(i, 1);
+      }
     }
   }
 
@@ -1974,10 +2492,143 @@ function setupRadioEvents() {
 }
 
 // ============================================================================
+// 9. KAWAII NEKO SALON / CUSTOMIZER EVENTS
+// ============================================================================
+function openNekoSalon() {
+  const modal = document.getElementById("neko-salon-modal");
+  modal.classList.remove("hidden");
+
+  // Populate name input
+  const nameInput = document.getElementById("neko-name-input");
+  if (nameInput) nameInput.value = nekoConfig.name;
+
+  // Zoom camera to Neko for live 3D preview
+  if (wingedCatMesh) {
+    transitionCamera(
+      new THREE.Vector3(wingedCatMesh.position.x + 0.9, wingedCatMesh.position.y + 0.2, wingedCatMesh.position.z + 2.2),
+      wingedCatMesh.position
+    );
+  }
+}
+
+function closeNekoSalon() {
+  const modal = document.getElementById("neko-salon-modal");
+  modal.classList.add("hidden");
+}
+
+function setupNekoSalonEvents() {
+  const openBtn = document.getElementById("open-neko-salon-btn");
+  const closeBtn = document.getElementById("close-salon-btn");
+  const backdrop = document.getElementById("salon-backdrop");
+  const nameInput = document.getElementById("neko-name-input");
+  const saveBtn = document.getElementById("save-neko-btn");
+  const resetBtn = document.getElementById("reset-neko-btn");
+
+  if (openBtn) openBtn.addEventListener("click", openNekoSalon);
+  if (closeBtn) closeBtn.addEventListener("click", closeNekoSalon);
+  if (backdrop) backdrop.addEventListener("click", closeNekoSalon);
+
+  // Live Name Input
+  if (nameInput) {
+    nameInput.addEventListener("input", (e) => {
+      nekoConfig.name = e.target.value.trim() || "Neko";
+      applyNekoCustomization();
+    });
+  }
+
+  // Coat Selection Buttons
+  const coatBtns = document.querySelectorAll("#coat-selection .salon-pill-btn");
+  coatBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      coatBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      nekoConfig.coat = btn.dataset.coat;
+      applyNekoCustomization();
+    });
+  });
+
+  // Spot Color Swatches
+  const spotSwatches = document.querySelectorAll("#spot-swatches .color-swatch");
+  spotSwatches.forEach(swatch => {
+    swatch.addEventListener("click", () => {
+      spotSwatches.forEach(s => s.classList.remove("active"));
+      swatch.classList.add("active");
+      nekoConfig.spotColor = swatch.dataset.color;
+      applyNekoCustomization();
+    });
+  });
+
+  // Eye Color Swatches
+  const eyeSwatches = document.querySelectorAll("#eye-swatches .color-swatch");
+  eyeSwatches.forEach(swatch => {
+    swatch.addEventListener("click", () => {
+      eyeSwatches.forEach(s => s.classList.remove("active"));
+      swatch.classList.add("active");
+      nekoConfig.eyeColor = swatch.dataset.eye;
+      applyNekoCustomization();
+    });
+  });
+
+  // Wings Selection
+  const wingBtns = document.querySelectorAll("#wings-selection .salon-pill-btn");
+  wingBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      wingBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      nekoConfig.wingType = btn.dataset.wing;
+      applyNekoCustomization();
+    });
+  });
+
+  // Accessory Selection
+  const accBtns = document.querySelectorAll("#acc-selection .salon-pill-btn");
+  accBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      accBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      nekoConfig.accessory = btn.dataset.acc;
+      applyNekoCustomization();
+    });
+  });
+
+  // Save & Adopt
+  if (saveBtn) {
+    saveBtn.addEventListener("click", () => {
+      saveNekoConfig();
+      closeNekoSalon();
+      showCatStatusToast(`🐾 ${nekoConfig.name} adopted and saved! (ฅ^•ﻌ•^ฅ) ✨`);
+      setActivePreset("cam-cat");
+      if (wingedCatMesh) {
+        transitionCamera(new THREE.Vector3(-2, 3.2, 5), wingedCatMesh.position);
+      }
+    });
+  }
+
+  // Reset Defaults
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      nekoConfig = {
+        name: "Mochi",
+        coat: "peach",
+        spotColor: "#78350f",
+        eyeColor: "#1e1b4b",
+        wingType: "angel",
+        accessory: "halo"
+      };
+      if (nameInput) nameInput.value = "Mochi";
+      applyNekoCustomization();
+      saveNekoConfig();
+      showCatStatusToast("Neko restored to default pastel angel! ✦");
+    });
+  }
+}
+
+// ============================================================================
 // INITIALIZATION ON DOM READY
 // ============================================================================
 document.addEventListener("DOMContentLoaded", () => {
   initLandingPage();
   setupBookReaderEvents();
   setupRadioEvents();
+  setupNekoSalonEvents();
 });
