@@ -1,0 +1,22 @@
+{
+  "name": "metaverse-lounge-garden",
+  "version": "2.0.0",
+  "description": "Metaverse Lounge with Collaborative 3D Garden, Plant Studio, and Golden Ticket system",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --check server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pg": "^8.13.3",
+    "socket.io": "^4.8.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "private": true
+}
