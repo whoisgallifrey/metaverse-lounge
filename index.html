@@ -124,7 +124,7 @@
           <button id="cam-library" class="preset-btn" title="Inspect Central Bookshelf">📚 Central Library</button>
           <button id="cam-pool" class="preset-btn" title="Pool & Flamingo Floaties">🦩 Flamingo Pool</button>
           <button id="cam-cat" class="preset-btn" title="Fly to Winged Purring Cat">🐱 Winged Cat</button>
-          <button id="open-neko-salon-btn" class="preset-btn salon-preset-btn" title="Customize Your Winged Cat">🎨 Style Neko</button>
+          <button id="open-neko-salon-btn" class="preset-btn salon-preset-btn" title="Customize Your Winged Cat">🎨 Style Cat</button>
         </div>
 
         <!-- Exit Door Button -->
@@ -281,93 +281,130 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- 4) KAWAII NEKO SALON / CUSTOMIZER MODAL    -->
+  <!-- 4) RETRO GAME BOY / TAMAGOTCHI CAT SALON   -->
   <!-- ========================================== -->
   <div id="neko-salon-modal" class="neko-salon-modal hidden" role="dialog" aria-modal="true">
     <div class="salon-backdrop" id="salon-backdrop"></div>
-    <div class="salon-card">
-      <div class="salon-header">
-        <div class="salon-brand">
-          <span class="salon-icon">🐾</span>
-          <span class="salon-title">KAWAII NEKO SALON • 猫のカスタム</span>
-        </div>
-        <button id="close-salon-btn" class="close-device-btn" title="Close Salon">✕</button>
+    
+    <!-- Retro Handheld Console Chassis -->
+    <div class="tamagotchi-chassis">
+      <!-- Tamagotchi top antenna & loop -->
+      <div class="tamagotchi-keychain-loop">
+        <span class="loop-hole"></span>
       </div>
 
-      <div class="salon-body">
-        <!-- Neko Name -->
-        <div class="salon-row">
-          <label class="salon-label">Neko Name (名前):</label>
-          <input type="text" id="neko-name-input" maxlength="15" value="Mochi" class="salon-input" placeholder="Name your cat..." />
+      <div class="tamagotchi-brand-strip">
+        <div class="power-strip">
+          <span class="power-led-dot"></span>
+          <span class="brand-text">POCKET NEKO • TAMAGOTCHI 1996</span>
+        </div>
+        <button id="close-salon-btn" class="chassis-close-btn" title="Close [B]">✕</button>
+      </div>
+
+      <!-- LCD Screen Bezel Frame -->
+      <div class="tamagotchi-screen-bezel">
+        <div class="screen-header-bar">
+          <span class="battery-indicator">🔋 FULL</span>
+          <span class="lcd-title">♥ 2D PIXEL NEKO PREVIEW ♥</span>
+          <span class="sound-indicator">🔊 PURR</span>
         </div>
 
-        <!-- Coat Style -->
-        <div class="salon-row">
-          <label class="salon-label">Fur Coat & Pattern (毛並み):</label>
-          <div class="salon-btn-group" id="coat-selection">
-            <button class="salon-pill-btn active" data-coat="peach">🍑 Peach</button>
-            <button class="salon-pill-btn" data-coat="calico">🐾 Calico (三毛)</button>
-            <button class="salon-pill-btn" data-coat="tabby">🐯 Tabby (縞)</button>
-            <button class="salon-pill-btn" data-coat="tuxedo">👔 Tuxedo</button>
-            <button class="salon-pill-btn" data-coat="sakura">🌸 Sakura</button>
-            <button class="salon-pill-btn" data-coat="white">❄️ Snow</button>
-            <button class="salon-pill-btn" data-coat="void">✨ Void</button>
+        <!-- 2D Pixel Art Canvas Preview (Live animated turntable & real-time colors!) -->
+        <div class="pixel-cat-screen">
+          <canvas id="pixel-cat-canvas" width="220" height="150"></canvas>
+          <div class="pixel-cat-status-strip">
+            <span id="pixel-cat-name-badge">🐾 Mochi</span>
+            <span class="pixel-cat-purr-tag">PURR... ♪</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls Panel / Color & Parts Customizer -->
+      <div class="tamagotchi-controls-panel">
+        <!-- Name -->
+        <div class="salon-field">
+          <label class="field-label">NAME (名前):</label>
+          <input type="text" id="neko-name-input" maxlength="14" value="Mochi" class="tamagotchi-input" placeholder="Cat name..." />
+        </div>
+
+        <!-- Coat Fur Style -->
+        <div class="salon-field">
+          <label class="field-label">COAT PATTERN (毛並み):</label>
+          <div class="tamagotchi-pill-group" id="coat-selection">
+            <button class="t-pill-btn active" data-coat="peach">🍑 Peach</button>
+            <button class="t-pill-btn" data-coat="calico">🐾 Calico</button>
+            <button class="t-pill-btn" data-coat="tabby">🐯 Tabby</button>
+            <button class="t-pill-btn" data-coat="tuxedo">👔 Tuxedo</button>
+            <button class="t-pill-btn" data-coat="sakura">🌸 Sakura</button>
+            <button class="t-pill-btn" data-coat="white">❄️ Snow</button>
+            <button class="t-pill-btn" data-coat="void">✨ Void</button>
           </div>
         </div>
 
-        <!-- Spot / Pattern Color -->
-        <div class="salon-row">
-          <label class="salon-label">Spots & Patches Color (斑点の色):</label>
-          <div class="salon-color-swatches" id="spot-swatches">
-            <button class="color-swatch active" data-color="#78350f" style="background:#78350f" title="Caramel Choco"></button>
-            <button class="color-swatch" data-color="#ff71ce" style="background:#ff71ce" title="Strawberry Pink"></button>
-            <button class="color-swatch" data-color="#05ffa1" style="background:#05ffa1" title="Matcha Mint"></button>
-            <button class="color-swatch" data-color="#b757ff" style="background:#b757ff" title="Lavender Ube"></button>
-            <button class="color-swatch" data-color="#1e1b4b" style="background:#1e1b4b" title="Midnight Navy"></button>
-            <button class="color-swatch" data-color="#f59e0b" style="background:#f59e0b" title="Golden Ginger"></button>
+        <!-- Spots Color -->
+        <div class="salon-field">
+          <label class="field-label">SPOT COLOR (斑点):</label>
+          <div class="tamagotchi-swatch-group" id="spot-swatches">
+            <button class="t-swatch active" data-color="#78350f" style="background:#78350f" title="Caramel Choco"></button>
+            <button class="t-swatch" data-color="#ff71ce" style="background:#ff71ce" title="Strawberry"></button>
+            <button class="t-swatch" data-color="#05ffa1" style="background:#05ffa1" title="Mint"></button>
+            <button class="t-swatch" data-color="#b757ff" style="background:#b757ff" title="Lavender"></button>
+            <button class="t-swatch" data-color="#1e1b4b" style="background:#1e1b4b" title="Midnight"></button>
+            <button class="t-swatch" data-color="#f59e0b" style="background:#f59e0b" title="Ginger Gold"></button>
           </div>
         </div>
 
         <!-- Eye Color -->
-        <div class="salon-row">
-          <label class="salon-label">Eye Color (瞳の色):</label>
-          <div class="salon-color-swatches" id="eye-swatches">
-            <button class="color-swatch active" data-eye="#1e1b4b" style="background:#1e1b4b" title="Deep Midnight"></button>
-            <button class="color-swatch" data-eye="#05ffa1" style="background:#05ffa1" title="Emerald Mint"></button>
-            <button class="color-swatch" data-eye="#01cdfe" style="background:#01cdfe" title="Sapphire Teal"></button>
-            <button class="color-swatch" data-eye="#fffb96" style="background:#fffb96" title="Golden Amber"></button>
-            <button class="color-swatch" data-eye="#ff71ce" style="background:#ff71ce" title="Ruby Pink"></button>
-            <button class="color-swatch" data-eye="hetero" style="background:linear-gradient(135deg, #01cdfe 50%, #fffb96 50%)" title="Heterochromia (Blue/Gold)"></button>
+        <div class="salon-field">
+          <label class="field-label">EYE COLOR (瞳):</label>
+          <div class="tamagotchi-swatch-group" id="eye-swatches">
+            <button class="t-swatch active" data-eye="#1e1b4b" style="background:#1e1b4b" title="Midnight Navy"></button>
+            <button class="t-swatch" data-eye="#05ffa1" style="background:#05ffa1" title="Emerald Mint"></button>
+            <button class="t-swatch" data-eye="#01cdfe" style="background:#01cdfe" title="Sapphire Teal"></button>
+            <button class="t-swatch" data-eye="#fffb96" style="background:#fffb96" title="Golden Amber"></button>
+            <button class="t-swatch" data-eye="#ff71ce" style="background:#ff71ce" title="Ruby Pink"></button>
+            <button class="t-swatch" data-eye="hetero" style="background:linear-gradient(135deg, #01cdfe 50%, #fffb96 50%)" title="Heterochromia (Blue/Gold)"></button>
           </div>
         </div>
 
-        <!-- Wings Type -->
-        <div class="salon-row">
-          <label class="salon-label">Wings Style (羽のスタイル):</label>
-          <div class="salon-btn-group" id="wings-selection">
-            <button class="salon-pill-btn active" data-wing="angel">🪽 Angel</button>
-            <button class="salon-pill-btn" data-wing="pixie">🧚 Pixie</button>
-            <button class="salon-pill-btn" data-wing="bat">🦇 Kawaii Bat</button>
-            <button class="salon-pill-btn" data-wing="star">⭐ Stardust</button>
+        <!-- Wings Style -->
+        <div class="salon-field">
+          <label class="field-label">WINGS (羽):</label>
+          <div class="tamagotchi-pill-group" id="wings-selection">
+            <button class="t-pill-btn active" data-wing="angel">🪽 Angel</button>
+            <button class="t-pill-btn" data-wing="pixie">🧚 Pixie</button>
+            <button class="t-pill-btn" data-wing="bat">🦇 Bat</button>
+            <button class="t-pill-btn" data-wing="star">⭐ Star</button>
           </div>
         </div>
 
-        <!-- Headgear / Accessories -->
-        <div class="salon-row">
-          <label class="salon-label">Accessories (アクセサリー):</label>
-          <div class="salon-btn-group" id="acc-selection">
-            <button class="salon-pill-btn active" data-acc="halo">✦ Halo</button>
-            <button class="salon-pill-btn" data-acc="bow">🎀 Pink Bow</button>
-            <button class="salon-pill-btn" data-acc="sakura">🌸 Sakura</button>
-            <button class="salon-pill-btn" data-acc="wizard">🧙 Witch Hat</button>
-            <button class="salon-pill-btn" data-acc="none">None</button>
+        <!-- Accessories -->
+        <div class="salon-field">
+          <label class="field-label">ACCESSORY (飾り):</label>
+          <div class="tamagotchi-pill-group" id="acc-selection">
+            <button class="t-pill-btn active" data-acc="halo">✦ Halo</button>
+            <button class="t-pill-btn" data-acc="bow">🎀 Bow</button>
+            <button class="t-pill-btn" data-acc="sakura">🌸 Sakura</button>
+            <button class="t-pill-btn" data-acc="wizard">🧙 Hat</button>
+            <button class="t-pill-btn" data-acc="none">None</button>
           </div>
         </div>
       </div>
 
-      <div class="salon-footer">
-        <button id="reset-neko-btn" class="page-nav-btn">Reset Defaults</button>
-        <button id="save-neko-btn" class="couch-read-btn">💾 Save & Adopt (決定)</button>
+      <!-- Game Boy Console Bottom: D-Pad, Speaker Grill, A/B Buttons -->
+      <div class="tamagotchi-bottom-console">
+        <div class="console-dpad-decor">
+          <span class="dpad-arm arm-v"></span>
+          <span class="dpad-arm arm-h"></span>
+          <span class="dpad-center"></span>
+        </div>
+        <div class="console-action-buttons">
+          <button id="reset-neko-btn" class="console-btn-b" title="Reset Defaults [B]">RESET</button>
+          <button id="save-neko-btn" class="console-btn-a" title="Save & Adopt [A]">★ SAVE & ADOPT ★</button>
+        </div>
+        <div class="console-speaker-grill">
+          <span></span><span></span><span></span>
+        </div>
       </div>
     </div>
   </div>

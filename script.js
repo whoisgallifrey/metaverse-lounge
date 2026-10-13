@@ -2025,6 +2025,7 @@ function handleObjectClick(obj) {
       break;
     case "cat":
       petTheWingedCat();
+      openNekoSalon();
       break;
     case "radio":
       audioMgr.nextTrack();
@@ -2265,7 +2266,18 @@ function animate() {
   }
 
   // 6. Camera Movement & Smooth Transitions
-  if (cameraTargetPos && cameraTargetLook) {
+  if (isSalonOpen && wingedCatMesh) {
+    // 3D Turntable Camera Orbit around Neko while salon is open
+    salonTurntableAngle += delta * 0.75;
+    const orbitRadius = 2.4;
+    camera.position.x = wingedCatMesh.position.x + Math.sin(salonTurntableAngle) * orbitRadius;
+    camera.position.z = wingedCatMesh.position.z + Math.cos(salonTurntableAngle) * orbitRadius;
+    camera.position.y = wingedCatMesh.position.y + 0.25;
+    camera.lookAt(wingedCatMesh.position);
+
+    // Live Render 2D Pixel Art Cat on Game Boy LCD Screen
+    render2DPixelCat(time);
+  } else if (cameraTargetPos && cameraTargetLook) {
     camera.position.lerp(cameraTargetPos, 0.06);
     currentLookAt.lerp(cameraTargetLook, 0.06);
     camera.lookAt(currentLookAt);
@@ -2492,9 +2504,13 @@ function setupRadioEvents() {
 }
 
 // ============================================================================
-// 9. KAWAII NEKO SALON / CUSTOMIZER EVENTS
+// 9. RETRO GAME BOY / TAMAGOTCHI 2D PIXEL CAT SALON
 // ============================================================================
+let isSalonOpen = false;
+let salonTurntableAngle = 0;
+
 function openNekoSalon() {
+  isSalonOpen = true;
   const modal = document.getElementById("neko-salon-modal");
   modal.classList.remove("hidden");
 
@@ -2502,18 +2518,219 @@ function openNekoSalon() {
   const nameInput = document.getElementById("neko-name-input");
   if (nameInput) nameInput.value = nekoConfig.name;
 
-  // Zoom camera to Neko for live 3D preview
+  // Zoom camera gently into a close-up turntable orbit around the cat
   if (wingedCatMesh) {
+    salonTurntableAngle = 0;
     transitionCamera(
-      new THREE.Vector3(wingedCatMesh.position.x + 0.9, wingedCatMesh.position.y + 0.2, wingedCatMesh.position.z + 2.2),
+      new THREE.Vector3(wingedCatMesh.position.x + 1.8, wingedCatMesh.position.y + 0.3, wingedCatMesh.position.z + 1.8),
       wingedCatMesh.position
     );
   }
 }
 
 function closeNekoSalon() {
+  isSalonOpen = false;
   const modal = document.getElementById("neko-salon-modal");
   modal.classList.add("hidden");
+}
+
+// 2D Pixel Art Cat Renderer for Game Boy LCD Screen
+function render2DPixelCat(time) {
+  const canvas = document.getElementById("pixel-cat-canvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const width = canvas.width;
+  const height = canvas.height;
+
+  // Clear with dark vaporwave LCD background
+  ctx.fillStyle = "#0c1524";
+  ctx.fillRect(0, 0, width, height);
+
+  // Subtle LCD scanline grid
+  ctx.fillStyle = "rgba(1, 205, 254, 0.05)";
+  for (let y = 0; y < height; y += 4) {
+    ctx.fillRect(0, y, width, 2);
+  }
+
+  // Motion physics
+  const centerX = width / 2;
+  const centerY = height / 2 + 10;
+  const bobY = Math.sin(time * 3.2) * 3;
+  const tilt = Math.sin(time * 1.6) * 0.12;
+  const breathe = Math.sin(time * 4.0) * 1.5;
+  const wingFlap = Math.sin(time * 7.5) * 8;
+  const tailSway = Math.sin(time * 3.8) * 7;
+  const blink = (time % 3.2) < 0.16;
+
+  // Coat colors
+  const coatMap = {
+    peach: "#fed7aa",
+    calico: "#fff7ed",
+    tabby: "#e2e8f0",
+    tuxedo: "#1e142e",
+    sakura: "#fbcfe8",
+    white: "#ffffff",
+    void: "#120824"
+  };
+  const bodyColor = coatMap[nekoConfig.coat] || "#fed7aa";
+  const spotColor = nekoConfig.spotColor || "#78350f";
+
+  ctx.save();
+  ctx.translate(centerX, centerY + bobY);
+
+  // 1. Wings (behind body)
+  if (nekoConfig.wingType !== "none") {
+    ctx.save();
+    let wingFill = "#01cdfe";
+    if (nekoConfig.wingType === "pixie") wingFill = "#ff71ce";
+    if (nekoConfig.wingType === "bat") wingFill = "#9333ea";
+    if (nekoConfig.wingType === "star") wingFill = "#fffb96";
+
+    ctx.fillStyle = wingFill;
+    [-1, 1].forEach(side => {
+      ctx.save();
+      ctx.translate(side * 24, -14);
+      ctx.rotate(side * (0.2 + wingFlap * 0.04));
+      
+      // Draw pixel wing shape
+      if (nekoConfig.wingType === "bat") {
+        ctx.fillRect(-12 * side, -10, 24, 12);
+        ctx.fillRect(-8 * side, 2, 16, 6);
+      } else if (nekoConfig.wingType === "star") {
+        ctx.fillRect(-8, -8, 16, 16);
+      } else {
+        ctx.fillRect(-10 * side, -14, 22, 16);
+        ctx.fillRect(-6 * side, 2, 14, 10);
+      }
+      ctx.restore();
+    });
+    ctx.restore();
+  }
+
+  // 2. Tail (swaying behind body)
+  ctx.save();
+  ctx.fillStyle = bodyColor;
+  ctx.fillRect(-34 + tailSway, 2, 14, 8);
+  ctx.fillRect(-42 + tailSway, -6, 10, 10);
+  ctx.fillRect(-46 + tailSway, -16, 8, 12);
+  ctx.restore();
+
+  // 3. Body
+  ctx.fillStyle = bodyColor;
+  ctx.fillRect(-28 - breathe * 0.5, -16, 56 + breathe, 40);
+  // Paws
+  ctx.fillRect(-24, 24, 14, 8);
+  ctx.fillRect(10, 24, 14, 8);
+
+  // Calico Patches or Tabby Stripes on Body
+  if (nekoConfig.coat === "calico") {
+    ctx.fillStyle = spotColor;
+    ctx.fillRect(-18, -12, 16, 16);
+    ctx.fillRect(8, 0, 14, 14);
+  } else if (nekoConfig.coat === "tabby") {
+    ctx.fillStyle = spotColor;
+    ctx.fillRect(-20, -10, 40, 4);
+    ctx.fillRect(-16, 0, 32, 4);
+    ctx.fillRect(-12, 10, 24, 4);
+  } else if (nekoConfig.coat === "tuxedo") {
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(-10, -6, 20, 24);
+  }
+
+  // 4. Head (with tilting angle)
+  ctx.save();
+  ctx.translate(0, -22);
+  ctx.rotate(tilt);
+
+  // Ears
+  ctx.fillStyle = bodyColor;
+  // Left Ear
+  ctx.fillRect(-26, -26, 14, 16);
+  ctx.fillRect(-22, -34, 8, 10);
+  // Right Ear
+  ctx.fillRect(12, -26, 14, 16);
+  ctx.fillRect(14, -34, 8, 10);
+
+  // Inner Pink Ear
+  ctx.fillStyle = "#ff71ce";
+  ctx.fillRect(-20, -28, 6, 10);
+  ctx.fillRect(14, -28, 6, 10);
+
+  // Head Base
+  ctx.fillStyle = bodyColor;
+  ctx.fillRect(-28, -20, 56, 40);
+
+  // Forehead patch for calico
+  if (nekoConfig.coat === "calico") {
+    ctx.fillStyle = spotColor;
+    ctx.fillRect(4, -20, 18, 12);
+  }
+
+  // Blushing Cheeks
+  ctx.fillStyle = "#ff71ce";
+  ctx.fillRect(-24, 2, 8, 6);
+  ctx.fillRect(16, 2, 8, 6);
+
+  // Nose
+  ctx.fillStyle = "#ff71ce";
+  ctx.fillRect(-3, 0, 6, 4);
+
+  // Eyes (Open vs Happy Closed ^ . ^)
+  if (blink || isPettedHappy) {
+    // Happy Closed Eyes (^ . ^)
+    ctx.fillStyle = "#1e1b4b";
+    ctx.fillRect(-18, -8, 10, 3);
+    ctx.fillRect(-16, -11, 6, 3);
+    ctx.fillRect(8, -8, 10, 3);
+    ctx.fillRect(10, -11, 6, 3);
+  } else {
+    // Open Big Anime Eyes
+    let leftEye = nekoConfig.eyeColor === "hetero" ? "#01cdfe" : nekoConfig.eyeColor;
+    let rightEye = nekoConfig.eyeColor === "hetero" ? "#fffb96" : nekoConfig.eyeColor;
+
+    // Left Eye
+    ctx.fillStyle = leftEye;
+    ctx.fillRect(-18, -12, 10, 12);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(-16, -10, 4, 4);
+
+    // Right Eye
+    ctx.fillStyle = rightEye;
+    ctx.fillRect(8, -12, 10, 12);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(10, -10, 4, 4);
+  }
+
+  // 5. Head Accessory (Halo, Bow, Sakura, Wizard)
+  if (nekoConfig.accessory === "halo") {
+    ctx.fillStyle = "#fffb96";
+    ctx.fillRect(-20, -42 + Math.sin(time * 4) * 2, 40, 5);
+    ctx.clearRect(-14, -40 + Math.sin(time * 4) * 2, 28, 2);
+  } else if (nekoConfig.accessory === "bow") {
+    ctx.fillStyle = "#ff2a85";
+    ctx.fillRect(-8, 20, 16, 8);
+    ctx.fillRect(-14, 18, 8, 12);
+    ctx.fillRect(6, 18, 8, 12);
+  } else if (nekoConfig.accessory === "sakura") {
+    ctx.fillStyle = "#ff71ce";
+    ctx.fillRect(14, -30, 12, 12);
+    ctx.fillStyle = "#fffb96";
+    ctx.fillRect(18, -26, 4, 4);
+  } else if (nekoConfig.accessory === "wizard") {
+    ctx.fillStyle = "#4a126d";
+    ctx.fillRect(-22, -32, 44, 6);
+    ctx.fillRect(-14, -46, 28, 14);
+    ctx.fillRect(-8, -58, 16, 12);
+    ctx.fillStyle = "#fffb96";
+    ctx.fillRect(-12, -36, 24, 4);
+  }
+
+  ctx.restore(); // end head
+  ctx.restore(); // end root
+
+  // Update status strip name badge
+  const nameBadge = document.getElementById("pixel-cat-name-badge");
+  if (nameBadge) nameBadge.innerText = `🐾 ${nekoConfig.name}`;
 }
 
 function setupNekoSalonEvents() {
@@ -2537,7 +2754,7 @@ function setupNekoSalonEvents() {
   }
 
   // Coat Selection Buttons
-  const coatBtns = document.querySelectorAll("#coat-selection .salon-pill-btn");
+  const coatBtns = document.querySelectorAll("#coat-selection .t-pill-btn");
   coatBtns.forEach(btn => {
     btn.addEventListener("click", () => {
       coatBtns.forEach(b => b.classList.remove("active"));
@@ -2548,7 +2765,7 @@ function setupNekoSalonEvents() {
   });
 
   // Spot Color Swatches
-  const spotSwatches = document.querySelectorAll("#spot-swatches .color-swatch");
+  const spotSwatches = document.querySelectorAll("#spot-swatches .t-swatch");
   spotSwatches.forEach(swatch => {
     swatch.addEventListener("click", () => {
       spotSwatches.forEach(s => s.classList.remove("active"));
@@ -2559,7 +2776,7 @@ function setupNekoSalonEvents() {
   });
 
   // Eye Color Swatches
-  const eyeSwatches = document.querySelectorAll("#eye-swatches .color-swatch");
+  const eyeSwatches = document.querySelectorAll("#eye-swatches .t-swatch");
   eyeSwatches.forEach(swatch => {
     swatch.addEventListener("click", () => {
       eyeSwatches.forEach(s => s.classList.remove("active"));
@@ -2570,7 +2787,7 @@ function setupNekoSalonEvents() {
   });
 
   // Wings Selection
-  const wingBtns = document.querySelectorAll("#wings-selection .salon-pill-btn");
+  const wingBtns = document.querySelectorAll("#wings-selection .t-pill-btn");
   wingBtns.forEach(btn => {
     btn.addEventListener("click", () => {
       wingBtns.forEach(b => b.classList.remove("active"));
@@ -2581,7 +2798,7 @@ function setupNekoSalonEvents() {
   });
 
   // Accessory Selection
-  const accBtns = document.querySelectorAll("#acc-selection .salon-pill-btn");
+  const accBtns = document.querySelectorAll("#acc-selection .t-pill-btn");
   accBtns.forEach(btn => {
     btn.addEventListener("click", () => {
       accBtns.forEach(b => b.classList.remove("active"));
@@ -2591,16 +2808,24 @@ function setupNekoSalonEvents() {
     });
   });
 
-  // Save & Adopt
+  // Save & Adopt - Smoothly returns to the lounge with companion floating beside you
   if (saveBtn) {
     saveBtn.addEventListener("click", () => {
+      audioMgr.playCatMeow();
+      audioMgr.playPortalOpen();
       saveNekoConfig();
       closeNekoSalon();
-      showCatStatusToast(`🐾 ${nekoConfig.name} adopted and saved! (ฅ^•ﻌ•^ฅ) ✨`);
-      setActivePreset("cam-cat");
+
+      // Smoothly return camera to lounge view
+      transitionCamera(new THREE.Vector3(0, 2.5, 9), new THREE.Vector3(0, 2.2, 0));
+
+      // Cat floats gently beside the user / camera in the lounge!
       if (wingedCatMesh) {
-        transitionCamera(new THREE.Vector3(-2, 3.2, 5), wingedCatMesh.position);
+        wingedCatMesh.position.set(1.5, 2.5, 6.8);
       }
+
+      showCatStatusToast(`🐾 ${nekoConfig.name} adopted! Floating beside you in the lounge ✨ (ฅ^•ﻌ•^ฅ)`);
+      setActivePreset("cam-free");
     });
   }
 
