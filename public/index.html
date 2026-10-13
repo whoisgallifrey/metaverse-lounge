@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="style.css">
   <!-- Three.js from CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- Socket.IO Client for Real-time Garden Updates -->
+  <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
   <!-- Scanline & CRT Vaporwave overlay -->
@@ -121,10 +123,14 @@
         <div class="camera-presets">
           <button id="cam-free" class="preset-btn active" title="Walk & Free Explore">🚶 Walk / Explore</button>
           <button id="cam-couch" class="preset-btn" title="Sit on Bright Pink Inflatable Couch">🛋️ Sit on Couch</button>
-          <button id="cam-library" class="preset-btn" title="Inspect Central Bookshelf">📚 Central Library</button>
-          <button id="cam-pool" class="preset-btn" title="Pool & Flamingo Floaties">🦩 Flamingo Pool</button>
-          <button id="cam-cat" class="preset-btn" title="Fly to Winged Purring Cat">🐱 Winged Cat</button>
+          <button id="cam-library" class="preset-btn" title="Inspect Central Bookshelf">📚 Library</button>
+          <button id="cam-pool" class="preset-btn" title="Pool & Flamingo Floaties">🦩 Pool</button>
+          <button id="cam-cat" class="preset-btn" title="Fly to Winged Purring Cat">🐱 Cat</button>
           <button id="open-neko-salon-btn" class="preset-btn salon-preset-btn" title="Customize Your Winged Cat">🎨 Style Cat</button>
+          <button id="cam-garden" class="preset-btn garden-preset-btn" title="Fly to Metaverse Garden">🌿 Garden</button>
+          <button id="open-garden-studio-btn" class="preset-btn plant-preset-btn" title="Plant Studio: Create 3D Plant">🌱 Plant Studio</button>
+          <button id="open-golden-ticket-btn" class="preset-btn ticket-preset-btn" title="View Golden Ticket Pass">🎫 Golden Ticket</button>
+          <button id="open-recovery-btn" class="preset-btn recover-preset-btn" title="Recover Saved Session">🔑 Recover</button>
         </div>
 
         <!-- Exit Door Button -->
@@ -404,6 +410,245 @@
         </div>
         <div class="console-speaker-grill">
           <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+  <!-- ========================================== -->
+  <!-- 5) PLANT CREATION STUDIO MODAL             -->
+  <!-- ========================================== -->
+  <div id="plant-studio-modal" class="garden-modal hidden" role="dialog" aria-modal="true">
+    <div class="garden-backdrop" id="plant-studio-backdrop"></div>
+    <div class="studio-device">
+      <div class="studio-header">
+        <div class="device-lights">
+          <span class="dot dot-pink"></span>
+          <span class="dot dot-teal"></span>
+          <span class="dot dot-yellow"></span>
+        </div>
+        <div class="studio-title">🌱 PLANT CREATION STUDIO • 秘密の植物工房</div>
+        <button id="close-studio-btn" class="close-device-btn" title="Close Studio">✕</button>
+      </div>
+
+      <div class="studio-body">
+        <!-- 3D Plant Interactive Preview Viewport -->
+        <div class="studio-preview-col">
+          <div class="preview-bezel">
+            <div class="preview-header">
+              <span class="preview-tag">3D ART TOY PREVIEW</span>
+              <span class="preview-hint">DRAG TO ROTATE 🔄</span>
+            </div>
+            <div id="plant-preview-container" class="plant-preview-container">
+              <!-- Three.js live preview canvas injected here -->
+            </div>
+            <div class="preview-status-strip">
+              <span id="preview-plant-name">Surreal Neon Mushroom</span>
+              <span class="preview-sway-tag">GENTLE BREEZE 🍃</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Studio Customization Controls -->
+        <div class="studio-controls-col">
+          <!-- Body Type Selector -->
+          <div class="studio-group">
+            <label class="studio-label">🌿 PLANT BODY (形態):</label>
+            <div class="studio-pill-grid" id="plant-body-grid">
+              <button class="s-pill-btn active" data-body="mushroom">🍄 Mushroom</button>
+              <button class="s-pill-btn" data-body="cactus">🌵 Cactus</button>
+              <button class="s-pill-btn" data-body="monstera">🍃 Monstera</button>
+              <button class="s-pill-btn" data-body="succulent">🪴 Succulent</button>
+              <button class="s-pill-btn" data-body="flower">🌸 Flower</button>
+              <button class="s-pill-btn" data-body="tree">🌳 Bonsai Tree</button>
+            </div>
+          </div>
+
+          <!-- Primary Color Selector -->
+          <div class="studio-group">
+            <label class="studio-label">🎨 PRIMARY COLOR (メイン色):</label>
+            <div class="studio-color-row" id="plant-primary-colors">
+              <button class="s-color-btn active" data-color="lilac" style="background:#d8b4fe" title="Lilac"></button>
+              <button class="s-color-btn" data-color="teal" style="background:#2dd4bf" title="Teal"></button>
+              <button class="s-color-btn" data-color="pink" style="background:#f472b6" title="Pink"></button>
+              <button class="s-color-btn" data-color="green" style="background:#4ade80" title="Green"></button>
+              <button class="s-color-btn" data-color="blue" style="background:#38bdf8" title="Blue"></button>
+              <button class="s-color-btn" data-color="red" style="background:#f87171" title="Red"></button>
+              <button class="s-color-btn" data-color="white" style="background:#f8fafc" title="White"></button>
+            </div>
+          </div>
+
+          <!-- Secondary Color Selector -->
+          <div class="studio-group">
+            <label class="studio-label">✨ ACCENT COLOR (アクセント色):</label>
+            <div class="studio-color-row" id="plant-secondary-colors">
+              <button class="s-color-btn" data-color="lilac" style="background:#d8b4fe" title="Lilac"></button>
+              <button class="s-color-btn active" data-color="teal" style="background:#2dd4bf" title="Teal"></button>
+              <button class="s-color-btn" data-color="pink" style="background:#f472b6" title="Pink"></button>
+              <button class="s-color-btn" data-color="green" style="background:#4ade80" title="Green"></button>
+              <button class="s-color-btn" data-color="blue" style="background:#38bdf8" title="Blue"></button>
+              <button class="s-color-btn" data-color="red" style="background:#f87171" title="Red"></button>
+              <button class="s-color-btn" data-color="white" style="background:#f8fafc" title="White"></button>
+            </div>
+          </div>
+
+          <!-- Cartoon Face / Eyes Selector -->
+          <div class="studio-group">
+            <label class="studio-label">👀 CARTOON EYES (表情 - 目):</label>
+            <div class="studio-pill-grid" id="plant-eyes-grid">
+              <button class="s-pill-btn active" data-eye="happy">^‿^ Happy</button>
+              <button class="s-pill-btn" data-eye="sleepy">−‿− Sleepy</button>
+              <button class="s-pill-btn" data-eye="playful">&gt;‿&lt; Playful</button>
+              <button class="s-pill-btn" data-eye="mysterious">•‿• Mysterious</button>
+              <button class="s-pill-btn" data-eye="uncanny">◉‿◉ Uncanny</button>
+            </div>
+          </div>
+
+          <!-- Cartoon Mouth Selector -->
+          <div class="studio-group">
+            <label class="studio-label">👄 MOUTH (口):</label>
+            <div class="studio-pill-grid" id="plant-mouth-grid">
+              <button class="s-pill-btn active" data-mouth="smile">‿ Gentle Smile</button>
+              <button class="s-pill-btn" data-mouth="cat">ω Cat Pout</button>
+              <button class="s-pill-btn" data-mouth="whistle">o Whistle</button>
+              <button class="s-pill-btn" data-mouth="mischievous">∇ Mischievous</button>
+              <button class="s-pill-btn" data-mouth="open">O Wonder</button>
+            </div>
+          </div>
+
+          <!-- Hidden Message Input (Sanitized, max 500 chars) -->
+          <div class="studio-group">
+            <div class="label-with-count">
+              <label class="studio-label">💌 HIDDEN SECRET MESSAGE (秘密の言葉):</label>
+              <span id="plant-msg-counter" class="char-counter">0 / 500</span>
+            </div>
+            <textarea id="plant-msg-input" class="studio-textarea" maxlength="500" placeholder="Leave a secret message, poetic thought, or greeting for future visitors who find your plant in the garden..."></textarea>
+          </div>
+
+          <!-- Submit / Plant Button -->
+          <div class="studio-actions">
+            <button id="cancel-studio-btn" class="studio-cancel-btn">Cancel</button>
+            <button id="submit-plant-btn" class="studio-submit-btn">★ PLANT IN COLLABORATIVE GARDEN ★</button>
+          </div>
+          <div id="plant-status-msg" class="plant-status-msg hidden"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 6) COLLECTIBLE GOLDEN TICKET MODAL         -->
+  <!-- ========================================== -->
+  <div id="golden-ticket-modal" class="garden-modal hidden" role="dialog" aria-modal="true">
+    <div class="garden-backdrop" id="golden-ticket-backdrop"></div>
+    <div class="ticket-wrapper">
+      <div class="ticket-header-strip">
+        <span>METAVERSE LOUNGE COLLECTIBLE TICKET SYSTEM</span>
+        <button id="close-ticket-btn" class="close-device-btn">✕</button>
+      </div>
+
+      <!-- Golden Ticket Card (Vaporwave Gold foil shimmer) -->
+      <div id="golden-ticket-card" class="golden-ticket-card">
+        <div class="ticket-shimmer-fx"></div>
+        
+        <div class="ticket-top-section">
+          <div class="ticket-seal">🌸 METAVERSE GARDEN 🌸</div>
+          <div class="ticket-meta-tag">OFFICIAL VISITOR MEMENTO</div>
+        </div>
+
+        <div class="ticket-main-title">
+          <h2>GOLDEN TICKET PASS</h2>
+          <div class="ticket-jp-sub">電脳庭園 • 黄金の訪問記念証</div>
+        </div>
+
+        <div class="ticket-stats-grid">
+          <div class="ticket-stat-box">
+            <span class="stat-label">VISITOR ID</span>
+            <span id="ticket-visitor-id" class="stat-value">v_guest</span>
+          </div>
+          <div class="ticket-stat-box">
+            <span class="stat-label">VISITS COUNT</span>
+            <span id="ticket-visits-count" class="stat-value">1</span>
+          </div>
+          <div class="ticket-stat-box">
+            <span class="stat-label">PLANTS PLANTED</span>
+            <span id="ticket-plants-count" class="stat-value">0</span>
+          </div>
+          <div class="ticket-stat-box">
+            <span class="stat-label">ISSUED DATE</span>
+            <span id="ticket-issued-date" class="stat-value">2026.10</span>
+          </div>
+        </div>
+
+        <div class="ticket-secret-section">
+          <div class="secret-label">★ SECRET SESSION RECOVERY CODE ★</div>
+          <div id="ticket-recovery-code" class="secret-code-display">ML-XXXX-XXXX</div>
+          <div class="secret-hint">Save this code to restore your visitor identity and discover your plants on any device.</div>
+        </div>
+
+        <div class="ticket-barcode-wrap">
+          <div class="ticket-barcode"></div>
+          <div class="ticket-auth-text">AUTHENTICATED BY METAVERSE GARDEN NETWORK • IMMUTABLE RECORD</div>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="ticket-actions">
+        <button id="copy-ticket-code-btn" class="ticket-btn gold-btn">📋 Copy Secret Code</button>
+        <button id="download-ticket-btn" class="ticket-btn pink-btn">💾 Download Ticket Card</button>
+      </div>
+      <div id="ticket-copy-feedback" class="copy-feedback-toast hidden">✓ Code copied to clipboard!</div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 7) SESSION RECOVERY MODAL                  -->
+  <!-- ========================================== -->
+  <div id="recovery-modal" class="garden-modal hidden" role="dialog" aria-modal="true">
+    <div class="garden-backdrop" id="recovery-backdrop"></div>
+    <div class="recovery-box">
+      <div class="recovery-header">
+        <div class="recovery-title">🔑 RESTORE GARDEN SESSION</div>
+        <button id="close-recovery-btn" class="close-device-btn">✕</button>
+      </div>
+      <div class="recovery-body">
+        <p class="recovery-desc">Enter the secret recovery code from your Golden Ticket to retrieve your visitor profile and your planted plants:</p>
+        <div class="recovery-input-wrap">
+          <input type="text" id="recovery-code-input" class="recovery-input" placeholder="e.g. ML-D999DD-A3D73F" maxlength="32" autocomplete="off" />
+          <button id="submit-recovery-btn" class="recovery-submit-btn">Restore Session</button>
+        </div>
+        <div id="recovery-result-msg" class="recovery-result-msg hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 8) PLANT DISCOVERY POPUP                   -->
+  <!-- ========================================== -->
+  <div id="plant-discovery-modal" class="garden-modal hidden" role="dialog" aria-modal="true">
+    <div class="garden-backdrop" id="discovery-backdrop"></div>
+    <div class="discovery-card">
+      <div class="discovery-header">
+        <span class="discovery-badge">🌸 SECRET MESSAGE DISCOVERED! 🌸</span>
+        <button id="close-discovery-btn" class="close-device-btn">✕</button>
+      </div>
+      <div class="discovery-body">
+        <div class="discovery-plant-visual">
+          <span id="discovery-icon" class="discovery-icon">🍄</span>
+          <div class="discovery-titles">
+            <h3 id="discovery-plant-type" class="discovery-type">Neon Mushroom</h3>
+            <div id="discovery-creator-tag" class="discovery-creator">Planted by Visitor v_xxxx</div>
+            <div id="discovery-date-tag" class="discovery-date">Planted recently</div>
+          </div>
+        </div>
+
+        <div class="discovery-quote-box">
+          <div class="quote-mark left">❝</div>
+          <div id="discovery-message-text" class="discovery-message-text">...</div>
+          <div class="quote-mark right">❞</div>
+        </div>
+
+        <div class="discovery-actions">
+          <button id="pet-plant-btn" class="discovery-pet-btn">💖 Pet This Plant</button>
+          <button id="dismiss-discovery-btn" class="discovery-close-btn">Continue Exploring</button>
         </div>
       </div>
     </div>
