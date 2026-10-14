@@ -17,6 +17,78 @@
 // ============================================================================
 const PUBLIC_DOMAIN_BOOKS = [
   {
+    id: "abogamer-vr-decompression",
+    title: "Diving Decompression and VR Aftercare",
+    author: "Micaela Mantegna (Abogamer)",
+    year: "2023",
+    color: "#2dd4bf",
+    sourceUrl: "https://www.abogamer.com/resources",
+    directUrl: "https://www.abogamer.com/news-1/diving-decompression-vr-aftercare",
+    downloadUrl: "/api/resources/abogamer/vr-decompression.txt",
+    sections: [
+      {
+        heading: "1. Lessons from the Deep & The Drop",
+        text: `What does BDSM, diving, and the metaverse have in common? This article explores the novel idea of "immersive aftercare protocols", to shape the way we safely reinsert back from virtual reality.\n\nWhen divers return to the surface, they have to follow a process to reintroduce their bodies to the atmosphere. To avoid decompression sickness, during their ascent divers make either a series of stops (staged decompression), or follow a slow but continuous process. It is a deliberate process of acclimatization to protect the body from the changes of going from one state of pressure to another.\n\nInterestingly similar, kink lifestyles implement a stage of aftercare following an intense session to deal with the physical and emotional exhaustion ("the drop"). Both have in common the care placed in how to transition back from an immersive experience to mundane life.`
+      },
+      {
+        heading: "2. The Virtual Transition & Sensory Disconnect",
+        text: `Digital immersive experiences could extrapolate some of those lessons, as current technological attention is mostly placed in entering, rather than exiting, XR environments.\n\nWhich steps do we need to take to safely go back from a deeply immersive VR experience? How do we re-enter our physical body and space after experiencing virtual embodiment? In the long term, can you separate the effects in our cognition, when your body and mind are tricked into feeling something as real?\n\nStudies have linked immersive virtual reality with post-session dissociation and a lower sense of presence in objective reality. We need deliberate rituals of VR aftercare.`
+      }
+    ]
+  },
+  {
+    id: "abogamer-arteficial",
+    title: "ARTEficial: Creatividad, IA y Derecho de Autor",
+    author: "Micaela Mantegna (Abogamer)",
+    year: "2022 / 2025",
+    color: "#01cdfe",
+    sourceUrl: "https://www.abogamer.com/resources",
+    directUrl: "https://www.abogamer.com/news-1/arteficial%3A-",
+    downloadUrl: "/api/resources/abogamer/arteficial.txt",
+    sections: [
+      {
+        heading: "1. Creatividad Humana vs. Generación Algorítmica",
+        text: `La intersección entre la inteligencia artificial generativa y el derecho de autor plantea preguntas fundamentales sobre la naturaleza misma de la creatividad humana y los límites de la propiedad intelectual.\n\nEl derecho de autor moderno fue edificado sobre una concepción romántica del genio individual. Frente a sistemas de IA que procesan millones de parámetros y datasets colectivos, esta visión entra en crisis. La creatividad es intrínsecamente relacional y comunitaria.`
+      },
+      {
+        heading: "2. Datasets de Entrenamiento y Dominio Público",
+        text: `Debemos distinguir con claridad entre el uso de obras para el entrenamiento de modelos (minería de texto y datos como lectura computacional) y las obras generadas como resultado (output).\n\nAplicar el copyright de forma restrictiva al aprendizaje de máquinas arriesga privatizar el conocimiento y consolidar monopolios en manos de unos pocos gigantes tecnológicos. Las obras creadas sin intervención creativa humana genuina no deben recibir monopolios de exclusividad artificiales: el dominio público es la savia de la cultura humana.`
+      }
+    ]
+  },
+  {
+    id: "abogamer-deadlock-dilemma",
+    title: "Generative AI, Copyright & The Deadlock Dilemma",
+    author: "Micaela Mantegna (Abogamer)",
+    year: "2024",
+    color: "#fffb96",
+    sourceUrl: "https://www.abogamer.com/resources",
+    directUrl: "https://www.abogamer.com/news-1/artificial-why-copyright-is-not-the-right-policy-tool-to-deal-with-generative-ai",
+    downloadUrl: "/api/resources/abogamer/deadlock-dilemma.txt",
+    sections: [
+      {
+        heading: "The Copyright Deadlock",
+        text: `AI & Copyright are locked in a zero-sum game. One vs the other, in a tug-of-war where compromise seems out of the question. But what if expanding copyright is not the right policy tool?\n\nCreative industries and artists feel threatened by unauthorized scraping, while tech companies claim blanket fair use. Expanding copyright scope creates licensing cartels that hurt indie creators while failing to resolve ethical questions. We need collective remuneration mechanisms and public digital commons (Published on SSRN: 5090127).`
+      }
+    ]
+  },
+  {
+    id: "abogamer-dumb-gods",
+    title: "The Internet of Dumb Gods",
+    author: "Micaela Mantegna (Abogamer)",
+    year: "2022",
+    color: "#b757ff",
+    sourceUrl: "https://www.abogamer.com/resources",
+    directUrl: "https://www.abogamer.com/news-1/the-internet-of-dumb-gods",
+    downloadUrl: "/api/resources/abogamer/dumb-gods.txt",
+    sections: [
+      {
+        heading: "Lovecraft and the Cult of the Algorithm",
+        text: `People are becoming increasingly ritualistic in dealing with AI in social media. We pose and post in certain ways, even without knowing how those actions impact the result.\n\nThrough the lenses of Lovecraft’s cosmic horror pantheon, this article explores the deification of AI and the "cult of the algorithm": opaque, automated systems that govern online speech and livelihood like indifferent cosmic deities.`
+      }
+    ]
+  },
+  {
     id: "alice",
     title: "Alice's Adventures in Wonderland",
     author: "Lewis Carroll",
@@ -726,6 +798,9 @@ function initThreeWorld() {
   createRetroBoomboxRadio();
   createExitDoor();
   createCollaborativeGarden();
+
+  // Load persistent garden plants into 3D scene
+  loadGardenPlants();
 
   // Setup Event Listeners
   setupControls();
@@ -2507,11 +2582,24 @@ function renderBookSection() {
   const indicator = document.getElementById("page-indicator");
 
   indicator.innerText = `Section ${currentSectionIdx + 1} / ${currentBook.sections.length}`;
+
+  let extraLinksHtml = "";
+  if (currentBook.directUrl || currentBook.downloadUrl || currentBook.sourceUrl) {
+    extraLinksHtml = `
+      <div style="margin-top: 20px; padding-top: 14px; border-top: 1px dashed rgba(255, 113, 206, 0.4); display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; align-items: center;">
+        ${currentBook.directUrl ? `<a href="${currentBook.directUrl}" target="_blank" rel="noopener noreferrer" style="color: var(--vapor-teal); text-decoration: underline; font-weight: bold; padding: 4px 8px; background: rgba(45, 212, 191, 0.1); border-radius: 4px; border: 1px solid rgba(45, 212, 191, 0.3);">🔗 Ver artículo en abogamer.com</a>` : ''}
+        ${currentBook.downloadUrl ? `<a href="${currentBook.downloadUrl}" target="_blank" download style="color: var(--vapor-yellow); text-decoration: underline; font-weight: bold; padding: 4px 8px; background: rgba(253, 224, 71, 0.1); border-radius: 4px; border: 1px solid rgba(253, 224, 71, 0.3);">💾 Descargar texto completo (.txt)</a>` : ''}
+        ${currentBook.sourceUrl && !currentBook.directUrl ? `<a href="${currentBook.sourceUrl}" target="_blank" rel="noopener noreferrer" style="color: rgba(255,255,255,0.7); text-decoration: underline;">🌐 Fuente: ${currentBook.sourceUrl}</a>` : ''}
+      </div>
+    `;
+  }
+
   container.innerHTML = `
     <h3 style="color: var(--vapor-pink); margin-bottom: 12px; font-family: var(--font-pixel); font-size: 12px;">
       ${section.heading}
     </h3>
-    <div style="font-size: ${currentFontSize}px; white-space: pre-wrap;">${section.text}</div>
+    <div style="font-size: ${currentFontSize}px; white-space: pre-wrap; line-height: 1.6;">${section.text}</div>
+    ${extraLinksHtml}
   `;
   container.scrollTop = 0;
 }
@@ -3570,7 +3658,7 @@ async function loadGardenPlants() {
       gardenPlants = data.plants;
       // Clear existing garden plant meshes
       gardenPlantMeshes.forEach(mesh => {
-        scene.remove(mesh);
+        if (scene) scene.remove(mesh);
         const idx = interactiveObjects.indexOf(mesh);
         if (idx !== -1) interactiveObjects.splice(idx, 1);
       });
@@ -4183,34 +4271,43 @@ async function submitRecoveryCode() {
   }
 }
 
-// 9. Load Abogamer Legal Essays into Library Reader
+// 9. Load Abogamer Legal Essays into Library Reader (Micaela Mantegna)
 async function loadAbogamerResources() {
   try {
     const res = await fetch("/api/resources/abogamer");
     const data = await res.json();
     if (data.success && Array.isArray(data.articles)) {
       data.articles.forEach(art => {
-        // Prepend to PUBLIC_DOMAIN_BOOKS so they are featured in the library
-        const exists = PUBLIC_DOMAIN_BOOKS.some(b => b.id === art.id);
-        if (!exists) {
-          PUBLIC_DOMAIN_BOOKS.unshift({
-            id: art.id,
-            title: art.title,
-            author: art.author,
-            year: "2024",
-            color: "#2dd4bf",
-            sourceUrl: art.sourceUrl,
-            downloadUrl: art.downloadUrl,
-            sections: [
-              {
-                heading: art.subtitle,
-                text: `${art.summary}\n\n[Categoría: ${art.category} • ${art.readTime}]\n\nEste ensayo forma parte de los recursos jurídicos de Abogamer sobre derecho en los videojuegos y protección de creaciones interactivas.\nPuedes descargar el documento completo o visitar el artículo original en https://www.abogamer.com/resources.`
-              }
-            ]
-          });
+        const existingIdx = PUBLIC_DOMAIN_BOOKS.findIndex(b => b.id === art.id);
+        const bookEntry = {
+          id: art.id,
+          title: art.title,
+          author: art.author,
+          year: art.year || "2024",
+          color: "#2dd4bf",
+          sourceUrl: art.sourceUrl,
+          directUrl: art.directUrl,
+          downloadUrl: art.downloadUrl,
+          sections: [
+            {
+              heading: art.subtitle,
+              text: `${art.summary}\n\n[Categoría: ${art.category} • ${art.readTime}]\n\nInvestigación de Micaela Mantegna (Abogamer, Activist and Scholar).\nPuedes consultar el artículo en línea o descargar el texto completo.`
+            }
+          ]
+        };
+
+        if (existingIdx >= 0) {
+          // Merge metadata
+          PUBLIC_DOMAIN_BOOKS[existingIdx] = {
+            ...PUBLIC_DOMAIN_BOOKS[existingIdx],
+            ...bookEntry,
+            sections: PUBLIC_DOMAIN_BOOKS[existingIdx].sections || bookEntry.sections
+          };
+        } else {
+          PUBLIC_DOMAIN_BOOKS.unshift(bookEntry);
         }
       });
-      console.log("📚 [Library] Abogamer legal essays loaded into Cyber-Reader.");
+      console.log(`📚 [Library] ${data.articles.length} authentic Abogamer research works by Micaela Mantegna loaded into Cyber-Reader.`);
     }
   } catch (err) {
     console.warn("Could not load Abogamer resources:", err);
@@ -4284,6 +4381,9 @@ function setupGardenStudioEvents() {
   }
 
   // Buttons
+  const openStudioBtn = document.getElementById("open-garden-studio-btn");
+  if (openStudioBtn) openStudioBtn.addEventListener("click", openPlantStudio);
+
   const submitBtn = document.getElementById("submit-plant-btn");
   if (submitBtn) submitBtn.addEventListener("click", submitPlantToGarden);
 
@@ -4298,6 +4398,12 @@ function setupGardenStudioEvents() {
 }
 
 function setupGoldenTicketEvents() {
+  const openTicketBtn = document.getElementById("open-golden-ticket-btn");
+  if (openTicketBtn) openTicketBtn.addEventListener("click", openGoldenTicketModal);
+
+  const openRecBtn = document.getElementById("open-recovery-btn");
+  if (openRecBtn) openRecBtn.addEventListener("click", openRecoveryModal);
+
   const closeBtn = document.getElementById("close-ticket-btn");
   if (closeBtn) closeBtn.addEventListener("click", closeGoldenTicketModal);
 

@@ -432,89 +432,218 @@ app.post('/api/garden/plants', async (req, res) => {
   }
 });
 
-// Abogamer Essays and Resources API
+// Abogamer Essays and Resources API (Authentic research by Micaela Mantegna - https://www.abogamer.com/resources)
 app.get('/api/resources/abogamer', (req, res) => {
   const articles = [
     {
-      id: 'abogamer-terms-of-service',
-      title: 'Términos y Condiciones en Videojuegos',
-      subtitle: 'El contrato invisible que aceptamos sin leer',
-      author: 'Guillermo E. Rodriguez (Abogamer)',
+      id: 'abogamer-arteficial',
+      title: 'ARTEficial: Creatividad, IA y Derecho de Autor',
+      subtitle: 'El primer libro integral sobre Inteligencia Artificial y Copyright',
+      author: 'Micaela Mantegna (Abogamer)',
+      year: '2022 / 2025',
       sourceUrl: 'https://www.abogamer.com/resources',
-      category: 'Derecho Informático & Videojuegos',
-      summary: 'Análisis detallado sobre los contratos de adhesión, EULAs y términos de servicio en la industria del videojuego. Cómo operan los derechos de los usuarios y las limitaciones legales de las desarrolladoras.',
-      readTime: '6 min de lectura',
-      downloadUrl: '/api/resources/abogamer/terms-of-service.txt'
+      directUrl: 'https://www.abogamer.com/news-1/arteficial%3A-',
+      category: 'IA Generativa & Propiedad Intelectual',
+      summary: 'El primer libro pionero en Iberoamérica sobre IA generativa y derecho de autor. Aborda la doctrina del prompt, los derechos sobre datasets de entrenamiento, la autoría algorítmica y la defensa del dominio público cultural.',
+      readTime: '9 min de lectura',
+      downloadUrl: '/api/resources/abogamer/arteficial.txt'
     },
     {
-      id: 'abogamer-intellectual-property',
-      title: 'Propiedad Intelectual en el Desarrollo Indie',
-      subtitle: 'Protección de marcas, código, arte y mecánicas lúdicas',
-      author: 'Guillermo E. Rodriguez (Abogamer)',
+      id: 'abogamer-vr-decompression',
+      title: 'Diving Decompression and VR Aftercare',
+      subtitle: 'Protocolos de reingreso sensorial y cuidado post-inmersión en el Metaverso',
+      author: 'Micaela Mantegna (Abogamer)',
+      year: '2023',
       sourceUrl: 'https://www.abogamer.com/resources',
-      category: 'Propiedad Intelectual',
-      summary: 'Guía esencial para creadores de videojuegos: qué aspectos del juego están amparados por el derecho de autor, la distinción entre idea y expresión, y cómo resguardar el patrimonio del estudio independiente.',
+      directUrl: 'https://www.abogamer.com/news-1/diving-decompression-vr-aftercare',
+      category: 'Ética del Metaverso & XR',
+      summary: '¿Qué tienen en común el buceo de profundidad y la realidad virtual? La necesidad de protocolos de descompresión y aftercare para cuidar el cuerpo y la mente al regresar de experiencias inmersivas intensas y evitar la desrealización.',
+      readTime: '7 min de lectura',
+      downloadUrl: '/api/resources/abogamer/vr-decompression.txt'
+    },
+    {
+      id: 'abogamer-deadlock-dilemma',
+      title: 'Generative AI, Copyright and the Deadlock Dilemma',
+      subtitle: 'Why expanding copyright is not the right policy tool for AI',
+      author: 'Micaela Mantegna (Abogamer)',
+      year: '2024',
+      sourceUrl: 'https://www.abogamer.com/resources',
+      directUrl: 'https://www.abogamer.com/news-1/artificial-why-copyright-is-not-the-right-policy-tool-to-deal-with-generative-ai',
+      category: 'AI Policy & Fair Use',
+      summary: 'AI & Creative industries are locked in a zero-sum tug-of-war. Expanding copyright creates licensing monopolies that harm independent artists while failing to solve the ethical challenges of Generative AI. Paper available on SSRN (SSRN: 5090127).',
       readTime: '8 min de lectura',
-      downloadUrl: '/api/resources/abogamer/intellectual-property.txt'
+      downloadUrl: '/api/resources/abogamer/deadlock-dilemma.txt'
     },
     {
-      id: 'abogamer-virtual-assets',
-      title: 'Bienes Virtuales y Cuentas de Usuario',
-      subtitle: '¿De quién son realmente tus skins y personajes?',
-      author: 'Guillermo E. Rodriguez (Abogamer)',
+      id: 'abogamer-dumb-gods',
+      title: 'The Internet of Dumb Gods',
+      subtitle: 'Lovecraft, the cult of the algorithm, and AI deification',
+      author: 'Micaela Mantegna (Abogamer)',
+      year: '2022',
       sourceUrl: 'https://www.abogamer.com/resources',
-      category: 'Economía Virtual & Legales',
-      summary: 'El debate legal en torno a la propiedad de los activos digitales dentro de los mundos virtuales. Licencias de uso vs. propiedad real frente al cierre de servidores.',
+      directUrl: 'https://www.abogamer.com/news-1/the-internet-of-dumb-gods',
+      category: 'Filosofía Digital & Algoritmos',
+      summary: 'Through the lenses of Lovecraft’s cosmic horror pantheon, this essay explores the ritualistic deification of automated algorithms and social media feeds—inscrutable, opaque "dumb gods" that rule online culture without accountability.',
+      readTime: '6 min de lectura',
+      downloadUrl: '/api/resources/abogamer/dumb-gods.txt'
+    },
+    {
+      id: 'abogamer-metaverse-sequel',
+      title: 'How to Stop the Metaverse from Becoming the Internet’s Bad Sequel',
+      subtitle: 'Beyond corporate walled gardens: An open, humane XR commons',
+      author: 'Micaela Mantegna (Abogamer)',
+      year: '2022',
+      sourceUrl: 'https://www.abogamer.com/resources',
+      directUrl: 'https://abogamer.medium.com/how-to-stop-the-metaverse-from-becoming-the-internets-bad-sequel-975c19c46e4f',
+      category: 'Metaverso & Soberanía Digital',
+      summary: 'TED Fellow Talk companion essay: How the Big Tech corporate metaverse perpetuates the worst surveillance mechanisms of Web2, and why we must build an open, interoperable, and generative digital commons.',
+      readTime: '10 min de lectura',
+      downloadUrl: '/api/resources/abogamer/metaverse-sequel.txt'
+    },
+    {
+      id: 'abogamer-lets-play',
+      title: 'Let´s Play! Streamers y Propiedad Intelectual',
+      subtitle: 'El streaming de videojuegos como espacio negativo del derecho de autor',
+      author: 'Micaela Mantegna (Abogamer)',
+      year: '2016',
+      sourceUrl: 'https://www.abogamer.com/resources',
+      directUrl: 'https://www.abogamer.com/news-1/let%C2%B4s-play!-streamers-y-propiedad-intelectual-',
+      category: 'Gaming Culture & Fair Use',
+      summary: 'Estudio pionero sobre las transmisiones de Let\'s Play en Twitch y YouTube. La tensión entre el copyright del desarrollador y la creatividad transformativa del jugador en los espacios negativos de la propiedad intelectual.',
+      readTime: '6 min de lectura',
+      downloadUrl: '/api/resources/abogamer/lets-play.txt'
+    },
+    {
+      id: 'abogamer-pokemon-go',
+      title: 'Pokémon GO: Realidad Aumentada y Geoetiquetado',
+      subtitle: 'Interrogantes legales de la realidad aumentada en el espacio público',
+      author: 'Micaela Mantegna (Abogamer)',
+      year: '2016',
+      sourceUrl: 'https://www.abogamer.com/resources',
+      directUrl: 'https://www.abogamer.com/news-1/pok%C3%A9mon-go%2C-interrogantes-legales-de-la-realidad-aumentada-y-geoetiquetado',
+      category: 'Realidad Aumentada & Espacio Público',
+      summary: '"¡Querida, hay un Pikachu en el patio!": Los desafíos jurídicos inéditos de la realidad aumentada y el geoetiquetado: violación virtual de la propiedad privada, privacidad de datos y la monetización del espacio urbano compartido.',
       readTime: '5 min de lectura',
-      downloadUrl: '/api/resources/abogamer/virtual-assets.txt'
+      downloadUrl: '/api/resources/abogamer/pokemon-go.txt'
     }
   ];
   res.json({ success: true, articles });
 });
 
-// Essay text content downloads
+// Essay text content downloads (Authentic texts by Micaela Mantegna)
 app.get('/api/resources/abogamer/:slug.txt', (req, res) => {
   const slug = req.params.slug;
   const contentMap = {
-    'terms-of-service': `TÉRMINOS Y CONDICIONES EN VIDEOJUEGOS
-Autor: Guillermo E. Rodriguez (Abogamer) - https://www.abogamer.com/resources
+    'arteficial': `ARTEFICIAL: CREATIVIDAD, IA Y DERECHO DE AUTOR
+Autora: Micaela Mantegna (Abogamer, Activist and Scholar)
+Fuente: https://www.abogamer.com/resources | https://www.abogamer.com/news-1/arteficial%3A-
 
-Los contratos de adhesión en el ecosistema de los videojuegos constituyen una de las herramientas jurídicas más recurrentes y menos comprendidas por los usuarios finales.
+La intersección entre la inteligencia artificial generativa y el derecho de autor plantea preguntas fundamentales sobre la naturaleza misma de la creatividad humana y los límites de la propiedad intelectual.
 
-1. La naturaleza jurídica del EULA (End User License Agreement):
-Al comprar o descargar un videojuego, la mayoría de los usuarios cree estar adquiriendo un "producto". Sin embargo, en términos estrictamente legales, se adquiere una licencia de uso limitada, no exclusiva, revocable e intransferible.
+1. El Mito del Autor Exclusivo:
+El derecho de autor moderno fue edificado sobre una concepción romántica del genio individual. Frente a sistemas de IA que procesan millones de parámetros y datasets colectivos, esta visión entra en crisis. La creatividad es intrínsecamente relacional y comunitaria.
 
-2. Cláusulas abusivas y límites jurisdiccionales:
-Las compañías suelen incorporar cláusulas de exoneración total de responsabilidad y sumisión a tribunales extranjeros. En legislaciones de protección al consumidor (como en América Latina y la UE), muchas de estas estipulaciones resultan nulas de pleno derecho.
+2. Entrada y Salida: El Dilema del Entrenamiento:
+Debemos distinguir con claridad entre el uso de obras para el entrenamiento de modelos (minería de texto y datos como lectura computacional) y las obras generadas como resultado (output). Aplicar el copyright de forma restrictiva al aprendizaje de máquinas arriesga privatizar el conocimiento y consolidar monopolios en manos de unos pocos gigantes tecnológicos.
 
-3. Conclusión:
-La transparencia contractual es el pilar de una comunidad sana entre jugadores y desarrolladores.`,
-    'intellectual-property': `PROPIEDAD INTELECTUAL EN EL DESARROLLO INDIE
-Autor: Guillermo E. Rodriguez (Abogamer) - https://www.abogamer.com/resources
+3. En Defensa del Dominio Público:
+Las obras creadas sin intervención creativa humana genuina no deben recibir monopolios de exclusividad artificiales. El dominio público es la savia de la cultura humana; sobreproteger los artefactos sintéticos empobrece a las futuras generaciones de artistas.`,
 
-El desarrollo independiente de videojuegos conjuga creatividad técnica y artística. Conocer las herramientas de protección legal evita disputas costosas.
+    'vr-decompression': `DIVING DECOMPRESSION AND VR AFTERCARE
+Author: Micaela Mantegna (Abogamer, Activist and Scholar - Berkman Klein Center affiliate)
+Source: https://www.abogamer.com/resources | https://www.abogamer.com/news-1/diving-decompression-vr-aftercare
 
-1. Idea vs. Expresión:
-Las mecánicas de juego en abstracto (un juego de plataformas, un roguelike) no son patentables ni protegibles per se. Lo que la ley ampara es la *expresión concreta*: el código fuente, los gráficos, los diálogos, la música y el diseño de niveles.
+What does diving, kink aftercare, and the metaverse have in common? This article explores the novel idea of "immersive aftercare protocols", to shape the way we safely reinsert back from virtual reality.
 
-2. Contratos de cesión de derechos con colaboradores:
-Es imperativo que todo artista, músico o programador externo firme un acuerdo de cesión o "work for hire" antes del lanzamiento para evitar reclamos posteriores sobre la autoría de los activos.
+1. Lessons from the Deep:
+When divers return to the surface, they follow a deliberate process to reintroduce their bodies to atmospheric pressure. To avoid decompression sickness, they make staged decompression stops to safely eliminate absorbed inert gases from body tissues. It is a calculated acclimatization to protect the organism when moving between states of physical pressure.
 
-3. Registro de marcas:
-Registrar el título y logotipo del estudio antes de la campaña de marketing previene el secuestro de marca (cybersquatting).`,
-    'virtual-assets': `BIENES VIRTUALES Y CUENTAS DE USUARIO
-Autor: Guillermo E. Rodriguez (Abogamer) - https://www.abogamer.com/resources
+2. The Need for Aftercare:
+Similarly, kink communities implement aftercare following intense sessions to address physical and emotional exhaustion ("the drop"). Both diving decompression and aftercare share a vital principle: deliberate care placed in how humans transition back from an intense, non-ordinary state to mundane reality.
 
-¿Qué sucede con los ítems cosméticos, skins y monedas virtuales cuando un juego cierra sus servidores?
+3. Exiting the Virtual:
+In XR (Extended Reality), almost all technological and design effort has been concentrated on onboarding—entering the virtual world—with virtually no consideration for offboarding. Deep immersive presence, vestibular conflict, and avatar embodiment can induce post-VR dissociation, derealization, and cognitive vertigo.
 
-1. El estatus de la tenencia digital:
-La mayoría de las plataformas estipula que los bienes virtuales carecen de valor monetario en el mundo real y representan meras funcionalidades dentro del software.
+4. Toward Immersive Protocols:
+We must build intentional, sensory transition rituals into spatial computing architectures: gradual lighting restoration, tactile grounding, and psychological decompression spaces before returning to the physical world.`,
 
-2. Desafíos regulatorios contemporáneos:
-El auge de los mercados secundarios y la evolución de los mundos persistentes (metaversos) están empujando a los tribunales a reconsiderar el valor patrimonial de las cuentas de usuario y los deberes de custodia de las compañías editoras.`
+    'deadlock-dilemma': `GENERATIVE AI, COPYRIGHT AND THE DEADLOCK DILEMMA
+Author: Micaela Mantegna (Abogamer, Activist and Scholar)
+Source: https://www.abogamer.com/resources | https://ssrn.com/abstract=5090127
+
+AI & Copyright are currently locked in a zero-sum game. One vs. the other, in a tug-of-war where compromise seems out of the question. But what if expanding copyright is not the solution?
+
+1. The Copyright Deadlock:
+Creative communities rightly feel threatened by unauthorized ingestion of their life's work, while technology companies argue that machine learning falls squarely under fair use or text and data mining exceptions. The result is an escalating war of litigation and licensing cartels.
+
+2. Why Expanding Copyright Fails Independent Artists:
+History shows that whenever copyright scope is broadened, the primary beneficiaries are not individual artists, but legacy corporate intermediaries and content aggregators. Expanding exclusive rights over data ingestion will merely give Big Tech and massive media conglomerates the power to build private walled gardens, while independent creators lose access to open tools.
+
+3. A Third Way:
+Rather than shoehorning machine learning into 18th-century copyright paradigms, we require collective remuneration mechanisms, transparent data provenance, and public digital infrastructure that treats cultural commons as a shared heritage.`,
+
+    'dumb-gods': `THE INTERNET OF DUMB GODS
+Author: Micaela Mantegna (Abogamer, Activist and Scholar)
+Source: https://www.abogamer.com/resources | https://www.abogamer.com/news-1/the-internet-of-dumb-gods
+
+Through the lenses of H.P. Lovecraft’s cosmic horror pantheon, this essay explores the deification of AI and the "cult of the algorithm" in digital life.
+
+1. The Cosmic Horror of Social Feeds:
+Lovecraft’s cosmic entities—Azathoth, Yog-Sothoth—were defined not by malevolence, but by supreme indifference and inscrutability. Today, digital users find themselves interacting with algorithmic recommendation engines and content moderation systems in an increasingly ritualistic manner: tweaking keywords, adjusting video pacing, and offering sacrifices to an unseen logic that no single human fully controls.
+
+2. Algorithmic Deification:
+We have outsourced judgment, visibility, and cultural livelihood to automated systems that mimic omniscience without possessing consciousness. In worshiping algorithmic metrics as objective truth, we surrender human agency to blind, automated forces.
+
+3. Reclaiming the Digital Commons:
+Recognizing algorithms as tools rather than deities is the first step toward demanding transparent governance, auditability, and human dignity in algorithmic spaces.`,
+
+    'metaverse-sequel': `HOW TO STOP THE METAVERSE FROM BECOMING THE INTERNET’S BAD SEQUEL
+Author: Micaela Mantegna (Abogamer, Activist and Scholar - TED Fellow)
+Source: https://www.abogamer.com/resources | https://abogamer.medium.com/how-to-stop-the-metaverse-from-becoming-the-internets-bad-sequel-975c19c46e4f
+
+Expanding the core concepts of Micaela Mantegna's TED Talk: why corporate visions of the metaverse threaten to repeat and magnify the worst extractive practices of the current internet.
+
+1. The Corporate Metaverse Trap:
+When Big Tech pitches the metaverse, it envisions interoperable shopping malls funded by biometric tracking, pupil-dilation surveillance, and proprietary hardware lock-in. It is Web2 surveillance capitalism projected into three dimensions.
+
+2. The Architecture of Virtual Freedom:
+A metaverse worthy of human habitation must be open, decentralized, and built on open web standards (WebXR, glTF, open protocols). It must protect the integrity of the human mind, ensuring that our avatars and spatial footprints remain our own sovereign domain.
+
+3. Designing for Play and Connection:
+The metaverse was born in science fiction and gaming subcultures as spaces for counter-culture expression, play, and community. We must preserve that surreal, artistic spark against corporate sanitization.`,
+
+    'lets-play': `LET'S PLAY! STREAMERS Y PROPIEDAD INTELECTUAL
+Autora: Micaela Mantegna (Abogamer, Activist and Scholar)
+Fuente: https://www.abogamer.com/resources | https://www.abogamer.com/news-1/let%C2%B4s-play!-streamers-y-propiedad-intelectual-
+
+El fenómeno del streaming de videojuegos en Twitch y YouTube ha revolucionado la industria cultural y puesto en jaque los conceptos tradicionales de la propiedad intelectual.
+
+1. El Videojuego como Obra Interactiva:
+A diferencia del cine o la literatura, el videojuego requiere de la acción y el input del jugador para existir en acto. Cuando un streamer juega, genera una capa de narrativa, humor, habilidad y comunidad que transforma la experiencia original en una nueva manifestación cultural.
+
+2. El Espacio Negativo de la Propiedad Intelectual:
+La coexistencia entre publishers y streamers funciona en gran medida gracias a una tolerancia tácita: aunque formalmente una transmisión podría considerarse una comunicación pública no autorizada, la industria se beneficia del impacto publicitario. Este equilibrio informal constituye un "espacio negativo" donde la innovación florece al margen de la coerción legal.
+
+3. Hacia un Marco de Certeza Jurídica:
+Depender de la mera tolerancia corporativa deja a los creadores en una situación de extrema vulnerabilidad. Es indispensable reconocer legalmente el derecho al uso transformativo y la libertad de expresión lúdica.`,
+
+    'pokemon-go': `POKÉMON GO: REALIDAD AUMENTADA Y GEOETIQUETADO
+Autora: Micaela Mantegna (Abogamer, Activist and Scholar)
+Fuente: https://www.abogamer.com/resources | https://www.abogamer.com/news-1/pok%C3%A9mon-go%2C-interrogantes-legales-de-la-realidad-aumentada-y-geoetiquetado
+
+"¡Querida, hay un Pikachu en el patio!": La llegada de Pokémon GO inauguró una nueva era donde el plano físico y la cartografía digital se superponen de manera conflictiva.
+
+1. ¿Violación Virtual de Domicilio (Virtual Trespass)?:
+Cuando un juego coloca un objeto virtual valioso dentro de una propiedad privada física, atrayendo a multitudes al lugar, ¿quién es responsable? Surge el debate sobre si los propietarios de bienes raíces tienen derechos exclusivos sobre la capa digital que sobrevuela sus inmuebles.
+
+2. La Apropiación Comercial del Espacio Urbano:
+Plazas, monumentos históricos y espacios de memoria pública se convirtieron repentinamente en gimnasios Pokémon con fines de lucro privado, sin consulta comunitaria previa. La realidad aumentada plantea interrogantes urgentes sobre quién tiene derecho a gobernar y monetizar el espacio público geolocalizado.
+
+3. Privacidad y Movilidad:
+El rastreo masivo y en tiempo real de los desplazamientos físicos de los usuarios abre riesgos de perfilado y vigilancia de una escala nunca antes vista.`
   };
 
-  const text = contentMap[slug] || 'Artículo no encontrado.';
+  const text = contentMap[slug] || 'Artículo de Micaela Mantegna no encontrado en el archivo.';
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   res.setHeader('Content-Disposition', `attachment; filename="${slug}.txt"`);
   res.send(text);
