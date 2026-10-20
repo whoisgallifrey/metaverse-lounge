@@ -344,6 +344,8 @@ class AudioManager {
       bandpass.frequency.setValueAtTime(450, this.ctx.currentTime);
       bandpass.Q.setValueAtTime(1.2, this.ctx.currentTime);
 
+      this.waterFilter = bandpass;
+
       this.waterGain = this.ctx.createGain();
       this.waterGain.gain.setValueAtTime(0.04, this.ctx.currentTime);
 
@@ -581,21 +583,46 @@ class AudioManager {
     });
   }
 
-  // Night Mode audio mixing: boosts water, softens lofi chords
-  setNightMode(isNight) {
+  // Couch Garden Contemplation audio mixing: radio off, cascade volume up +250%
+  setCouchAmbient(isSitting) {
+    this.ensureContext();
     if (!this.ctx) return;
     const t = this.ctx.currentTime;
-    if (isNight) {
+    if (isSitting) {
+      // 1. Radio goes off immediately
+      this.stopLofiMusic();
+
+      // 2. Cascade waterfall goes up in volume 250% more (base 0.04 -> 0.14, a 250% boost)
       if (this.waterGain) {
-        this.waterGain.gain.setValueAtTime(0.04, t);
-        this.waterGain.gain.linearRampToValueAtTime(0.12, t + 1.2);
+        const currentGain = this.waterGain.gain.value;
+        this.waterGain.gain.cancelScheduledValues(t);
+        this.waterGain.gain.setValueAtTime(currentGain, t);
+        this.waterGain.gain.linearRampToValueAtTime(0.14, t + 1.2);
+      }
+      if (this.waterFilter) {
+        this.waterFilter.frequency.cancelScheduledValues(t);
+        this.waterFilter.frequency.linearRampToValueAtTime(530, t + 1.2);
+        this.waterFilter.Q.linearRampToValueAtTime(0.9, t + 1.2);
       }
     } else {
+      // Restore normal waterfall ambient volume (0.04)
       if (this.waterGain) {
-        this.waterGain.gain.setValueAtTime(0.12, t);
+        const currentGain = this.waterGain.gain.value;
+        this.waterGain.gain.cancelScheduledValues(t);
+        this.waterGain.gain.setValueAtTime(currentGain, t);
         this.waterGain.gain.linearRampToValueAtTime(0.04, t + 1.0);
       }
+      if (this.waterFilter) {
+        this.waterFilter.frequency.cancelScheduledValues(t);
+        this.waterFilter.frequency.linearRampToValueAtTime(450, t + 1.0);
+        this.waterFilter.Q.linearRampToValueAtTime(1.2, t + 1.0);
+      }
     }
+  }
+
+  // Alias for backward compatibility
+  setNightMode(isNight) {
+    this.setCouchAmbient(isNight);
   }
 }
 
@@ -2045,13 +2072,13 @@ function setupControls() {
   const btnRight = document.getElementById("btn-right");
   const btnAction = document.getElementById("btn-touch-action");
 
-  btnUp.addEventListener("touchstart", (e) => { e.preventDefault(); moveForward = true; });
+  btnUp.addEventListener("touchstart", (e) => { e.preventDefault(); moveForward = true; if (isSittingOnCouch) standUpFromCouch(); });
   btnUp.addEventListener("touchend", () => { moveForward = false; });
-  btnDown.addEventListener("touchstart", (e) => { e.preventDefault(); moveBackward = true; });
+  btnDown.addEventListener("touchstart", (e) => { e.preventDefault(); moveBackward = true; if (isSittingOnCouch) standUpFromCouch(); });
   btnDown.addEventListener("touchend", () => { moveBackward = false; });
-  btnLeft.addEventListener("touchstart", (e) => { e.preventDefault(); moveLeft = true; });
+  btnLeft.addEventListener("touchstart", (e) => { e.preventDefault(); moveLeft = true; if (isSittingOnCouch) standUpFromCouch(); });
   btnLeft.addEventListener("touchend", () => { moveLeft = false; });
-  btnRight.addEventListener("touchstart", (e) => { e.preventDefault(); moveRight = true; });
+  btnRight.addEventListener("touchstart", (e) => { e.preventDefault(); moveRight = true; if (isSittingOnCouch) standUpFromCouch(); });
   btnRight.addEventListener("touchend", () => { moveRight = false; });
   btnAction.addEventListener("click", triggerCenterAction);
 
@@ -2200,16 +2227,23 @@ function handleObjectClick(obj) {
   }
 }
 
-// Sit on Pink Inflatable Couch & Night Mode
+// Sit on Pink Inflatable Couch & Garden Contemplation Mode
 function sitOnInflatableCouch() {
   isSittingOnCouch = true;
   setActivePreset("cam-couch");
-  // Camera view sitting comfortably on the couch looking toward library, floating cat & pool
-  transitionCamera(new THREE.Vector3(7.2, 1.45, 1.3), new THREE.Vector3(-1.0, 2.6, -5.0));
 
-  // Activate Couch Night Mode
+  // 1) Smooth camera transition & rotation: position on the couch seat cushion looking straight into the garden
+  // Couch is at (7.5, 0, 1.5). Eye-level sitting on cushion is (7.35, 1.45, 1.65).
+  // Target faces straight across the Collaborative Garden lawn at (10.5, 1.15, 9.5).
+  const couchCamPos = new THREE.Vector3(7.35, 1.45, 1.65);
+  const gardenCenterTarget = new THREE.Vector3(10.5, 1.15, 9.5);
+  transitionCamera(couchCamPos, gardenCenterTarget);
+
+  // 2) Radio goes off & sound of cascade waterfall goes up in volume 250% more
+  audioMgr.setCouchAmbient(true);
+
+  // Activate Couch Contemplation / Night Mode visual palette
   document.body.classList.add("couch-night-mode");
-  audioMgr.setNightMode(true);
 
   if (pinkDir) {
     pinkDir.color.set("#8b5cf6"); // Deep purple moonlight
@@ -2230,12 +2264,12 @@ function sitOnInflatableCouch() {
   if (!couchNightIndicator) {
     couchNightIndicator = document.createElement("div");
     couchNightIndicator.className = "night-mode-indicator";
-    couchNightIndicator.innerHTML = "🌙 COUCH NIGHT MODE • PURPLE MOONLIGHT (Click Walk to resume)";
+    couchNightIndicator.innerHTML = "🌙 COUCH GARDEN CONTEMPLATION • CASCADE AMBIENT (Click Walk to get up)";
     document.body.appendChild(couchNightIndicator);
   }
   couchNightIndicator.style.display = "block";
 
-  showCatStatusToast("Sitting on pink couch... 🛋️🌙 Night Mode active! Purple moonlight & waterfall sound.");
+  showCatStatusToast("Sitting on pink couch... 🛋️✨ Radio off, cascade louder (+250%), contemplating the garden!");
 }
 
 function standUpFromCouch() {
@@ -2243,9 +2277,11 @@ function standUpFromCouch() {
   isSittingOnCouch = false;
   setActivePreset("cam-free");
 
+  // Restore normal cascade ambient audio volume (down from +250% back to normal 0.04)
+  audioMgr.setCouchAmbient(false);
+
   // Deactivate Night Mode
   document.body.classList.remove("couch-night-mode");
-  audioMgr.setNightMode(false);
 
   if (pinkDir) {
     pinkDir.color.set("#ff71ce");
@@ -2266,6 +2302,8 @@ function standUpFromCouch() {
   if (couchNightIndicator) {
     couchNightIndicator.style.display = "none";
   }
+
+  showCatStatusToast("Standing up from the couch. Free walk mode active! 🚶‍♀️✨");
 }
 
 function burstHeartParticles(originPos) {
@@ -2502,14 +2540,32 @@ function animate() {
     // Live Render 2D Pixel Art Cat on Game Boy LCD Screen
     render2DPixelCat(time);
   } else if (cameraTargetPos && cameraTargetLook) {
-    camera.position.lerp(cameraTargetPos, 0.06);
-    currentLookAt.lerp(cameraTargetLook, 0.06);
+    camera.position.lerp(cameraTargetPos, 0.05);
+    currentLookAt.lerp(cameraTargetLook, 0.05);
     camera.lookAt(currentLookAt);
 
-    if (camera.position.distanceTo(cameraTargetPos) < 0.05) {
+    if (camera.position.distanceTo(cameraTargetPos) < 0.04 && currentLookAt.distanceTo(cameraTargetLook) < 0.04) {
+      camera.position.copy(cameraTargetPos);
+      currentLookAt.copy(cameraTargetLook);
+      camera.lookAt(currentLookAt);
       cameraTargetPos = null;
       cameraTargetLook = null;
+
+      // Sync cameraRotation angles so mouse panning starts seamlessly from current gaze
+      const forwardDir = new THREE.Vector3().subVectors(currentLookAt, camera.position).normalize();
+      cameraRotation.pitch = Math.asin(forwardDir.y);
+      cameraRotation.yaw = Math.atan2(forwardDir.x, -forwardDir.z);
     }
+  } else if (isSittingOnCouch) {
+    // When sitting on couch, hold position comfortably on the seat cushion facing garden
+    camera.position.set(7.35, 1.45, 1.65);
+    const lookVector = new THREE.Vector3(
+      Math.sin(cameraRotation.yaw) * Math.cos(cameraRotation.pitch),
+      Math.sin(cameraRotation.pitch),
+      -Math.cos(cameraRotation.yaw) * Math.cos(cameraRotation.pitch)
+    );
+    currentLookAt.copy(camera.position).add(lookVector);
+    camera.lookAt(currentLookAt);
   } else if (!isSittingOnCouch) {
     // Free Walking Controls
     const moveSpeed = 6.0 * delta;
@@ -3208,7 +3264,7 @@ function createCollaborativeGarden() {
     emissiveIntensity: 0.25
   });
 
-  // Perimeter border curb
+  // Perimeter border curb (North, South, East, and split West with entrance gateway)
   const curbNorth = new THREE.Mesh(new THREE.BoxGeometry(14.4, 0.35, 0.4), borderMat);
   curbNorth.position.set(9.5, 0.2, 2.5);
   gardenGroup.add(curbNorth);
@@ -3217,13 +3273,18 @@ function createCollaborativeGarden() {
   curbSouth.position.set(9.5, 0.2, 16.5);
   gardenGroup.add(curbSouth);
 
-  const curbWest = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.35, 14.4), borderMat);
-  curbWest.position.set(2.5, 0.2, 9.5);
-  gardenGroup.add(curbWest);
-
   const curbEast = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.35, 14.4), borderMat);
   curbEast.position.set(16.5, 0.2, 9.5);
   gardenGroup.add(curbEast);
+
+  // West curb segments with 3.4m entrance opening for stepping stone path (well away from the couch at 7.5, 1.5)
+  const curbWestNorth = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.35, 5.2), borderMat);
+  curbWestNorth.position.set(2.5, 0.2, 5.1);
+  gardenGroup.add(curbWestNorth);
+
+  const curbWestSouth = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.35, 5.2), borderMat);
+  curbWestSouth.position.set(2.5, 0.2, 13.9);
+  gardenGroup.add(curbWestSouth);
 
   // Stepping stones path connecting Lounge to Garden
   const stoneMat = new THREE.MeshStandardMaterial({ color: "#e2e8f0", roughness: 0.4 });
@@ -3233,7 +3294,7 @@ function createCollaborativeGarden() {
     gardenGroup.add(stone);
   }
 
-  // Holographic Garden Entrance Arch Sign
+  // Holographic Garden Entrance Arch Sign (Positioned at garden walkway entrance x=2.5, z=9.5, 10m away from couch)
   const archCanvas = document.createElement("canvas");
   archCanvas.width = 512;
   archCanvas.height = 128;
@@ -3254,17 +3315,29 @@ function createCollaborativeGarden() {
   const archTex = new THREE.CanvasTexture(archCanvas);
   const archSign = new THREE.Mesh(
     new THREE.PlaneGeometry(3.6, 0.9),
-    new THREE.MeshBasicMaterial({ map: archTex, transparent: true })
+    new THREE.MeshBasicMaterial({ map: archTex, transparent: true, side: THREE.DoubleSide })
   );
-  archSign.position.set(9.5, 3.8, 2.7);
+  archSign.position.set(2.5, 3.8, 9.5);
+  archSign.rotation.y = Math.PI / 2;
   gardenGroup.add(archSign);
 
-  // Arch Posts
+  // Arch Posts framing the entrance walkway
   const postMat = new THREE.MeshStandardMaterial({ color: "#4c1d95", metalness: 0.5 });
-  [-1.7, 1.7].forEach(xOff => {
+  const neonRingMat = new THREE.MeshStandardMaterial({
+    color: "#05ffa1",
+    emissive: "#05ffa1",
+    emissiveIntensity: 0.6,
+    roughness: 0.2
+  });
+  [-1.7, 1.7].forEach(zOff => {
     const post = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 3.8, 12), postMat);
-    post.position.set(9.5 + xOff, 1.9, 2.7);
+    post.position.set(2.5, 1.9, 9.5 + zOff);
     gardenGroup.add(post);
+
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.03, 8, 24), neonRingMat);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.set(2.5, 2.2, 9.5 + zOff);
+    gardenGroup.add(ring);
   });
 
   // Floating Pollen / Spores Particle System
