@@ -1280,8 +1280,9 @@ function createInflatablePinkCouch() {
   couchGroup.add(couchHitbox);
   interactiveObjects.push(couchHitbox);
 
-  couchGroup.position.set(7.5, 0, 1.5);
-  couchGroup.rotation.y = -Math.PI / 4;
+  // Position couch in open space horizontally facing the garden (zero collision, clear walkway)
+  couchGroup.position.set(9.5, 0, -1.2);
+  couchGroup.rotation.y = 0; // Horizontal, facing South directly into the garden
   scene.add(couchGroup);
 }
 
@@ -2232,11 +2233,11 @@ function sitOnInflatableCouch() {
   isSittingOnCouch = true;
   setActivePreset("cam-couch");
 
-  // 1) Smooth camera transition & rotation: position on the couch seat cushion looking straight into the garden
-  // Couch is at (7.5, 0, 1.5). Eye-level sitting on cushion is (7.35, 1.45, 1.65).
-  // Target faces straight across the Collaborative Garden lawn at (10.5, 1.15, 9.5).
-  const couchCamPos = new THREE.Vector3(7.35, 1.45, 1.65);
-  const gardenCenterTarget = new THREE.Vector3(10.5, 1.15, 9.5);
+  // 1) Smooth camera transition & rotation: position on the couch seat cushion looking straight South into the garden
+  // Couch is horizontally placed at (9.5, 0, -1.2). Eye-level sitting on cushion is (9.5, 1.45, -1.0).
+  // Target faces straight South across the Collaborative Garden lawn at (9.5, 1.15, 9.5).
+  const couchCamPos = new THREE.Vector3(9.5, 1.45, -1.0);
+  const gardenCenterTarget = new THREE.Vector3(9.5, 1.15, 9.5);
   transitionCamera(couchCamPos, gardenCenterTarget);
 
   // 2) Radio goes off & sound of cascade waterfall goes up in volume 250% more
@@ -2557,8 +2558,8 @@ function animate() {
       cameraRotation.yaw = Math.atan2(forwardDir.x, -forwardDir.z);
     }
   } else if (isSittingOnCouch) {
-    // When sitting on couch, hold position comfortably on the seat cushion facing garden
-    camera.position.set(7.35, 1.45, 1.65);
+    // When sitting on couch, hold position comfortably on the seat cushion facing South into the garden
+    camera.position.set(9.5, 1.45, -1.0);
     const lookVector = new THREE.Vector3(
       Math.sin(cameraRotation.yaw) * Math.cos(cameraRotation.pitch),
       Math.sin(cameraRotation.pitch),
@@ -3313,13 +3314,33 @@ function createCollaborativeGarden() {
   aCtx.fillText("共同庭園 • PLANT & DISCOVER", 256, 92);
 
   const archTex = new THREE.CanvasTexture(archCanvas);
-  const archSign = new THREE.Mesh(
+
+  // Outer sign face: specifically oriented with rotation.y = -Math.PI / 2 (facing -X) so it is 100% properly legible from the stepping stones entrance
+  const archSignOuter = new THREE.Mesh(
     new THREE.PlaneGeometry(3.6, 0.9),
-    new THREE.MeshBasicMaterial({ map: archTex, transparent: true, side: THREE.DoubleSide })
+    new THREE.MeshBasicMaterial({ map: archTex, transparent: true, side: THREE.FrontSide })
   );
-  archSign.position.set(2.5, 3.8, 9.5);
-  archSign.rotation.y = Math.PI / 2;
-  gardenGroup.add(archSign);
+  archSignOuter.position.set(2.48, 3.8, 9.5);
+  archSignOuter.rotation.y = -Math.PI / 2; // Directly faces visitors approaching along stepping stones
+  gardenGroup.add(archSignOuter);
+
+  // Inner sign face: specifically oriented with rotation.y = Math.PI / 2 (facing +X) so it is also 100% legible from inside the garden looking back
+  const archSignInner = new THREE.Mesh(
+    new THREE.PlaneGeometry(3.6, 0.9),
+    new THREE.MeshBasicMaterial({ map: archTex, transparent: true, side: THREE.FrontSide })
+  );
+  archSignInner.position.set(2.52, 3.8, 9.5);
+  archSignInner.rotation.y = Math.PI / 2; // Directly faces visitors inside the garden
+  gardenGroup.add(archSignInner);
+
+  // Top cyber crossbar connecting the entrance posts
+  const archCrossbar = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.08, 0.08, 3.6, 12),
+    new THREE.MeshStandardMaterial({ color: "#4c1d95", metalness: 0.5 })
+  );
+  archCrossbar.rotation.x = Math.PI / 2;
+  archCrossbar.position.set(2.5, 3.8, 9.5);
+  gardenGroup.add(archCrossbar);
 
   // Arch Posts framing the entrance walkway
   const postMat = new THREE.MeshStandardMaterial({ color: "#4c1d95", metalness: 0.5 });
