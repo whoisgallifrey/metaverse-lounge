@@ -1776,10 +1776,51 @@ body, html {
   cursor: grab;
   position: relative;
   overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .plant-preview-container:active {
   cursor: grabbing;
+}
+
+.preview-rotation-toolbar {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  justify-content: space-between;
+}
+
+.turntable-btn {
+  flex: 1;
+  padding: 6px 4px;
+  background: rgba(30, 11, 60, 0.85);
+  border: 1px solid rgba(1, 205, 254, 0.45);
+  border-radius: 4px;
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  color: var(--vapor-cyan);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.turntable-btn:hover {
+  background: rgba(1, 205, 254, 0.25);
+  border-color: var(--vapor-cyan);
+  box-shadow: 0 0 10px rgba(1, 205, 254, 0.5);
+  transform: translateY(-1px);
+}
+
+.turntable-btn.active {
+  background: rgba(5, 255, 161, 0.22);
+  border-color: var(--vapor-teal);
+  color: #05ffa1;
+  box-shadow: 0 0 8px rgba(5, 255, 161, 0.45);
 }
 
 .preview-status-strip {

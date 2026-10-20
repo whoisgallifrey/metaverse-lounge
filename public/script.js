@@ -2123,10 +2123,7 @@ function setupControls() {
     });
   }
 
-  const studioBtn = document.getElementById("open-garden-studio-btn");
-  if (studioBtn) {
-    studioBtn.addEventListener("click", openPlantStudio);
-  }
+  // Garden studio button listener handled in setupGardenStudioEvents()
 
   const ticketBtn = document.getElementById("open-golden-ticket-btn");
   if (ticketBtn) {
@@ -3898,11 +3895,14 @@ function petDiscoveredPlant() {
 
 // 6. PLANT CREATION STUDIO (Interactive 3D Turntable Preview)
 let studioScene = null, studioCamera = null, studioRenderer = null;
+let studioTurntableGroup = null;
 let studioPreviewMesh = null;
 let studioTurntableAngle = 0;
 let isStudioDragging = false;
+let studioAutoSpin = true;
 let studioPreviousPointerX = 0;
 let studioAnimId = null;
+let studioResizeObserver = null;
 
 let currentPlantConfig = {
   bodyType: "mushroom",
@@ -3915,107 +3915,206 @@ let currentPlantConfig = {
 
 function openPlantStudio() {
   const modal = document.getElementById("plant-studio-modal");
+  if (!modal) return;
+
+  if (isSittingOnCouch) {
+    standUpFromCouch();
+  }
+
   modal.classList.remove("hidden");
+  setActivePreset("open-garden-studio-btn");
+
   initPlantStudioPreview();
   updateStudioPreviewPlant();
+  startStudioAnimation();
+
+  // Ensure camera aspect and WebGL canvas dimensions match layout once visible
+  requestAnimationFrame(() => {
+    resizePlantStudioPreview();
+    if (studioRenderer && studioScene && studioCamera) {
+      studioRenderer.render(studioScene, studioCamera);
+    }
+  });
+  setTimeout(() => {
+    resizePlantStudioPreview();
+  }, 120);
 }
 
 function closePlantStudio() {
   const modal = document.getElementById("plant-studio-modal");
-  modal.classList.add("hidden");
+  if (modal) modal.classList.add("hidden");
+  stopStudioAnimation();
+}
+
+function startStudioAnimation() {
+  if (studioAnimId) return; // Already running
+
+  function animateStudio() {
+    studioAnimId = requestAnimationFrame(animateStudio);
+    if (!isStudioDragging && studioAutoSpin) {
+      studioTurntableAngle += 0.01; // smooth automatic turntable spin
+    }
+    if (studioTurntableGroup) {
+      studioTurntableGroup.rotation.y = studioTurntableAngle;
+    }
+    if (studioRenderer && studioScene && studioCamera) {
+      studioRenderer.render(studioScene, studioCamera);
+    }
+  }
+  studioAnimId = requestAnimationFrame(animateStudio);
+}
+
+function stopStudioAnimation() {
   if (studioAnimId) {
     cancelAnimationFrame(studioAnimId);
     studioAnimId = null;
   }
 }
 
+function resizePlantStudioPreview() {
+  const container = document.getElementById("plant-preview-container");
+  if (!container || !studioRenderer || !studioCamera) return;
+
+  const w = container.clientWidth || 320;
+  const h = container.clientHeight || 270;
+  if (w <= 0 || h <= 0) return;
+
+  studioCamera.aspect = w / h;
+  studioCamera.updateProjectionMatrix();
+  studioRenderer.setSize(w, h);
+  studioRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+}
+
 function initPlantStudioPreview() {
   const container = document.getElementById("plant-preview-container");
-  if (!container || studioRenderer) return;
+  if (!container) return;
+
+  // If already initialized, just ensure size and animation
+  if (studioRenderer) {
+    resizePlantStudioPreview();
+    return;
+  }
 
   const w = container.clientWidth || 320;
   const h = container.clientHeight || 270;
 
   studioScene = new THREE.Scene();
-  studioScene.background = new THREE.Color("#0f051e");
+  studioScene.background = new THREE.Color("#0d041c");
 
   studioCamera = new THREE.PerspectiveCamera(45, w / h, 0.1, 50);
-  studioCamera.position.set(0, 1.6, 4.2);
-  studioCamera.lookAt(0, 1.1, 0);
+  studioCamera.position.set(0, 1.6, 4.3);
+  studioCamera.lookAt(0, 1.05, 0);
 
   studioRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   studioRenderer.setSize(w, h);
-  studioRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  studioRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   studioRenderer.shadowMap.enabled = true;
   container.innerHTML = "";
   container.appendChild(studioRenderer.domElement);
 
-  // Studio Lights
-  const amb = new THREE.AmbientLight("#581c87", 1.8);
+  // Studio Lights: vaporwave ambient + neon key, fill, rim lights
+  const amb = new THREE.AmbientLight("#6b21a8", 2.0);
   studioScene.add(amb);
 
-  const dir1 = new THREE.DirectionalLight("#ff71ce", 2.2);
-  dir1.position.set(4, 6, 5);
-  studioScene.add(dir1);
+  const dirKey = new THREE.DirectionalLight("#ff71ce", 2.2);
+  dirKey.position.set(4, 6, 5);
+  dirKey.castShadow = true;
+  studioScene.add(dirKey);
 
-  const dir2 = new THREE.DirectionalLight("#01cdfe", 1.8);
-  dir2.position.set(-4, 3, -3);
-  studioScene.add(dir2);
+  const dirFill = new THREE.DirectionalLight("#01cdfe", 1.8);
+  dirFill.position.set(-4, 3, -3);
+  studioScene.add(dirFill);
 
-  // Turntable Pedestal Base
-  const pedMat = new THREE.MeshStandardMaterial({
-    color: "#271242",
-    roughness: 0.3,
-    metalness: 0.4
+  const dirRim = new THREE.DirectionalLight("#fffb96", 1.3);
+  dirRim.position.set(0, 6, -3);
+  studioScene.add(dirRim);
+
+  // Static floor base underneath turntable
+  const baseMat = new THREE.MeshStandardMaterial({
+    color: "#18092e",
+    roughness: 0.6,
+    metalness: 0.3
   });
-  const ped = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.6, 0.25, 24), pedMat);
-  ped.position.set(0, -0.12, 0);
-  studioScene.add(ped);
+  const floorBase = new THREE.Mesh(new THREE.CylinderGeometry(1.65, 1.8, 0.16, 32), baseMat);
+  floorBase.position.set(0, -0.08, 0);
+  studioScene.add(floorBase);
 
+  // Rotatable Turntable Group (rotates entire platform + plant together)
+  studioTurntableGroup = new THREE.Group();
+  studioScene.add(studioTurntableGroup);
+
+  const platterMat = new THREE.MeshStandardMaterial({
+    color: "#281245",
+    roughness: 0.25,
+    metalness: 0.5
+  });
+  const platter = new THREE.Mesh(new THREE.CylinderGeometry(1.45, 1.5, 0.12, 32), platterMat);
+  platter.position.set(0, 0.06, 0);
+  studioTurntableGroup.add(platter);
+
+  // Glowing cyber rim on platter
   const ringGlow = new THREE.Mesh(
-    new THREE.TorusGeometry(1.45, 0.04, 8, 32),
-    new THREE.MeshBasicMaterial({ color: "#2dd4bf" })
+    new THREE.TorusGeometry(1.47, 0.035, 12, 36),
+    new THREE.MeshBasicMaterial({ color: "#05ffa1" })
   );
-  ringGlow.position.set(0, 0, 0);
+  ringGlow.position.set(0, 0.12, 0);
   ringGlow.rotation.x = Math.PI / 2;
-  studioScene.add(ringGlow);
+  studioTurntableGroup.add(ringGlow);
 
-  // Mouse & Touch Drag Turntable Controls
+  // 8 Cyber radial notches on turntable to make rotation visually obvious
+  const notchMat = new THREE.MeshBasicMaterial({ color: "#01cdfe" });
+  for (let i = 0; i < 8; i++) {
+    const rad = (i / 8) * Math.PI * 2;
+    const notch = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.015, 0.32), notchMat);
+    notch.position.set(Math.sin(rad) * 1.25, 0.125, Math.cos(rad) * 1.25);
+    notch.rotation.y = rad;
+    studioTurntableGroup.add(notch);
+  }
+
+  // Pointer & Touch Drag Turntable Controls (using pointer capture)
   container.addEventListener("pointerdown", (e) => {
     isStudioDragging = true;
     studioPreviousPointerX = e.clientX;
+    try {
+      container.setPointerCapture(e.pointerId);
+    } catch (err) {}
   });
 
-  window.addEventListener("pointermove", (e) => {
+  container.addEventListener("pointermove", (e) => {
     if (!isStudioDragging) return;
     const deltaX = e.clientX - studioPreviousPointerX;
-    studioTurntableAngle += deltaX * 0.015;
+    studioTurntableAngle += deltaX * 0.012;
     studioPreviousPointerX = e.clientX;
+    if (studioTurntableGroup) {
+      studioTurntableGroup.rotation.y = studioTurntableAngle;
+    }
   });
 
-  window.addEventListener("pointerup", () => {
+  const onPointerEnd = (e) => {
     isStudioDragging = false;
-  });
+    try {
+      container.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+  };
+  container.addEventListener("pointerup", onPointerEnd);
+  container.addEventListener("pointercancel", onPointerEnd);
 
-  // Render loop
-  function animateStudio() {
-    studioAnimId = requestAnimationFrame(animateStudio);
-    if (!isStudioDragging) {
-      studioTurntableAngle += 0.008; // gentle automatic spin
-    }
-    if (studioPreviewMesh) {
-      studioPreviewMesh.rotation.y = studioTurntableAngle;
-    }
-    studioRenderer.render(studioScene, studioCamera);
+  // Responsive Resize Observer
+  if (window.ResizeObserver && !studioResizeObserver) {
+    studioResizeObserver = new ResizeObserver(() => {
+      resizePlantStudioPreview();
+    });
+    studioResizeObserver.observe(container);
   }
-  animateStudio();
+
+  window.addEventListener("resize", resizePlantStudioPreview);
 }
 
 function updateStudioPreviewPlant() {
-  if (!studioScene) return;
+  if (!studioScene || !studioTurntableGroup) return;
 
   if (studioPreviewMesh) {
-    studioScene.remove(studioPreviewMesh);
+    studioTurntableGroup.remove(studioPreviewMesh);
   }
 
   studioPreviewMesh = createPlantMesh({
@@ -4026,9 +4125,14 @@ function updateStudioPreviewPlant() {
     mouthType: currentPlantConfig.mouthType
   });
 
-  studioPreviewMesh.position.set(0, 0, 0);
-  studioPreviewMesh.rotation.y = studioTurntableAngle;
-  studioScene.add(studioPreviewMesh);
+  // Center on platter (y = 0.12) with slight vertical balancing per body
+  let yOffset = 0.12;
+  if (currentPlantConfig.bodyType === "succulent") yOffset = 0.32;
+  else if (currentPlantConfig.bodyType === "monstera") yOffset = 0.22;
+  studioPreviewMesh.position.set(0, yOffset, 0);
+
+  studioTurntableGroup.add(studioPreviewMesh);
+  studioTurntableGroup.rotation.y = studioTurntableAngle;
 
   // Update preview status name
   const nameEl = document.getElementById("preview-plant-name");
@@ -4042,6 +4146,11 @@ function updateStudioPreviewPlant() {
       tree: "🌳 Floating Dream Bonsai"
     };
     nameEl.innerText = titles[currentPlantConfig.bodyType] || "Art-Toy Plant";
+  }
+
+  // Render immediately so live changes show even when paused
+  if (studioRenderer && studioScene && studioCamera) {
+    studioRenderer.render(studioScene, studioCamera);
   }
 }
 
@@ -4489,6 +4598,48 @@ function setupGardenStudioEvents() {
 
   const backdrop = document.getElementById("plant-studio-backdrop");
   if (backdrop) backdrop.addEventListener("click", closePlantStudio);
+
+  // Turntable toolbar buttons (Left, Auto-Spin toggle, Right, Front)
+  setupTurntableControls();
+}
+
+function setupTurntableControls() {
+  const leftBtn = document.getElementById("studio-rot-left-btn");
+  const autoBtn = document.getElementById("studio-rot-auto-btn");
+  const rightBtn = document.getElementById("studio-rot-right-btn");
+  const resetBtn = document.getElementById("studio-rot-reset-btn");
+
+  if (leftBtn) {
+    leftBtn.addEventListener("click", () => {
+      studioTurntableAngle -= 0.45;
+      if (studioTurntableGroup) studioTurntableGroup.rotation.y = studioTurntableAngle;
+      if (studioRenderer && studioScene && studioCamera) studioRenderer.render(studioScene, studioCamera);
+    });
+  }
+
+  if (rightBtn) {
+    rightBtn.addEventListener("click", () => {
+      studioTurntableAngle += 0.45;
+      if (studioTurntableGroup) studioTurntableGroup.rotation.y = studioTurntableAngle;
+      if (studioRenderer && studioScene && studioCamera) studioRenderer.render(studioScene, studioCamera);
+    });
+  }
+
+  if (autoBtn) {
+    autoBtn.addEventListener("click", () => {
+      studioAutoSpin = !studioAutoSpin;
+      autoBtn.classList.toggle("active", studioAutoSpin);
+      autoBtn.innerText = studioAutoSpin ? "▶ AUTO-SPIN" : "⏸ PAUSED";
+    });
+  }
+
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      studioTurntableAngle = 0;
+      if (studioTurntableGroup) studioTurntableGroup.rotation.y = 0;
+      if (studioRenderer && studioScene && studioCamera) studioRenderer.render(studioScene, studioCamera);
+    });
+  }
 }
 
 function setupGoldenTicketEvents() {
